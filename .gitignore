@@ -1,3 +1,7 @@
+# image datasets
+scripts/python/data/dataset/*
+scripts/python/facial-expression.build/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
