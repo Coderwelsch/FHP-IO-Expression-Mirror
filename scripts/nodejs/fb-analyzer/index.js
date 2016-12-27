@@ -1,18 +1,20 @@
 const
-	Express = require( "express" ),
-	FbConfig = require( "./config.js" ),
+	AuthData = require( "./config.js" ),
+	FacebookAuth = require( "./lib/FacebookAuth.js" ),
 	FbGraph = require( "fbgraph" );
 
-
-module.exports = class FbAnalyzer {
+class FacebookAnalyzer {
 	constructor () {
-		this.expressServer = null;
-		this.authUrl = "";
+		this.fbAuth = null;
 
-		this.init();
+		this.initFacebookAuth();
 	}
 
-	init () {
-
+	initFacebookAuth () {
+		this.fbAuth = new FacebookAuth( ( accessToken ) => {
+			console.log( accessToken );
+		} );
 	}
-};
+}
+
+module.exports = FacebookAnalyzer;
