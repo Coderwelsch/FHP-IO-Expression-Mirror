@@ -1,21 +1,27 @@
-# IO-Expression-Mirror
-FHP project for the input / output course
+# IO-Mood-Mirror
+A smart mirror project that uses face expression detection to change a users mood.  
+_FHP project for the input / output course._
 
-# Dependencies
+## Dependencies
+- [nodejs 6+](https://nodejs.org/en/) and npm
 - python 2.7
-  - opencv lib for python
-  - for binary generation you will need nuitka
+  - [opencv lib for python](http://www.pyimagesearch.com/2016/11/28/macos-install-opencv-3-and-python-2-7/)
+  - [for binary generation you will need nuitka](http://nuitka.net/)
 
-# Run
-At first, the script has to learn your facial expressions, so you will run at first:
+## Install
+In the downloaded repo do:
 ```shell
-python face-dection.py --update
+npm i
 ```
-Please follow the instructions in the cli! After that, you can run
+
+## Before you could start
+Before you could start with the main smart mirror script you should train the face expression script to your face expressions and given environment.  
+You can do that by just typing this command in your console and follow the cli instructions to train the face expressions **angry**, **neutral**, **happy**:
+```
+npm run train
+```
+
+## Start the smart mirror script
 ```shell
-python face-dection.py
+npm start
 ```
-```shell
-./face-dection
-```
-to make some funny faces and hope that these emotions will be detected!
