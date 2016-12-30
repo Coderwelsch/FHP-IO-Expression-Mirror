@@ -34,17 +34,17 @@ def checkArguments ():
 	global emotions
 
 	if arguments.update:
-		trainingFaces( emotions )
+		faceTraining( emotions )
 		System.exit(1)
 
-def trainingFaces ( emotions ):
+def faceTraining ( emotions ):
 	print( "Updating classifier xml")
 	print( "Create folders" )
 	makeDirs( emotions )
-	
+
 	for i in range( 0, len( emotions ) ):
 		saveFace( emotions[ i ] )
-	
+
 	print( "Start face training now")
 	FaceTraining.update( emotions )
 	print( "Done!" )
@@ -53,7 +53,7 @@ def saveFace( emotion ):
 	global croppedFaces
 
 	print( "\n\nTraining the expression '" + emotion + "' in..." )
-	
+
 	for i in range( 0, 5 ):
 		print( 5 - i )
 		Time.sleep( 1 )
@@ -64,7 +64,7 @@ def saveFace( emotion ):
 
 	for x in croppedFaces.keys(): #save contents of dictionary to files
 		OpenCV.imwrite( "data/dataset/%s/%s.jpg" % ( emotion, len( glob.glob( "data/dataset/%s/*" % emotion ) ) ), croppedFaces[ x ] )
-	
+
 	croppedFaces.clear()
 
 def makeDirs ( emotions ):
@@ -89,13 +89,16 @@ def getProcessedFrame ():
 
 	# read video stream
 	ret, frame = videoCapture.read()
-	
+
+	if frame is None:
+		return False
+
 	# convert to gray scaled image
 	grayFrame = OpenCV.cvtColor( frame, OpenCV.COLOR_BGR2GRAY )
 
-	# equalize images over 2 seconds 
+	# equalize images over 2 seconds
 	histoEqual = OpenCV.createCLAHE( clipLimit = 2.0, tileGridSize = ( 8, 8 ) )
-	
+
 	# return history-equalized image ( better brightness )
 	return histoEqual.apply( grayFrame )
 
@@ -136,6 +139,9 @@ def findFaces ():
 	global faceCascade
 
 	processedFrame = getProcessedFrame()
+	if processedFrame is False:
+		return False
+
 	faces = faceCascade.detectMultiScale( processedFrame, scaleFactor = 1.1, minNeighbors = 15, minSize = ( 10, 10 ), flags = OpenCV.CASCADE_SCALE_IMAGE )
 
 	if len( faces ) >= 1:
