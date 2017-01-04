@@ -24,7 +24,7 @@ class FacebookAuth {
 			let accessToken = FileSystem.readFileSync( __dirname + "/../.access-token", { encoding: "utf8" } );
 
 			this.accessToken = accessToken;
-			this.callback( accessToken );
+			this.callback( null, accessToken );
 		} else {
 			this.initExpressServer( () => {
 				this.initFbAuth();
@@ -79,12 +79,12 @@ class FacebookAuth {
 	}
 
 	initFbAuth () {
-		OpenUrl.open( `https://www.facebook.com/v2.8/dialog/oauth?client_id=${ AuthData.appId }&redirect_uri=${ AuthData.authRedirectUrl }&response_type=code&scope=user_friends` );
+		OpenUrl.open( `https://www.facebook.com/v2.8/dialog/oauth?client_id=${ AuthData.appId }&redirect_uri=${ AuthData.authRedirectUrl }&response_type=code&scope=user_friends,user_posts,user_likes` );
 	}
 
-	done () {
-		this.closeServer();
-		this.callback( this.accessToken );
+	done ( error = null ) {
+		this.closeServer( error );
+		this.callback( error, this.accessToken );
 	}
 }
 

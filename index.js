@@ -1,12 +1,13 @@
 const
-	FbAnalyzer = require( "./scripts/nodejs/fb-analyzer/index.js" ),
+	FacebookDataScraper = require( "./scripts/nodejs/fb-data-scraper/index.js" ),
 	SteamF2P = require( "./scripts/nodejs/steam-f2p-suggests/index.js" );
 	ChefkochRecipeOfTheDay = require( "./scripts/nodejs/chefkoch-recipe-of-the-day/index.js" );
 
 let
-	fbAnalyzer = new FbAnalyzer(),
+	fbScraper = new FacebookDataScraper(),
 	steamF2P = new SteamF2P( true ),
 	recipeOfTheDay = new ChefkochRecipeOfTheDay( true );
+
 
 // steamF2P.getRandomGame( ( error, gameData ) => {
 // 	if ( error ) {
