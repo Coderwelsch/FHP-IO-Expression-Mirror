@@ -5,30 +5,29 @@ const
 
 class FacebookDataScraper {
 	constructor ( callback = null ) {
-		this.callback = callback;
 		this.fbAuth = null;
 		this.fbGraph = null;
 		this.accessToken = "";
 
-		this.initFacebookAuth();
+		this.initFacebookAuth( callback );
 	}
 
-	initFacebookAuth () {
+	initFacebookAuth ( callback = null ) {
 		this.fbAuth = new FacebookAuth( ( error, accessToken ) => {
 			if ( error ) {
-				throw new Error( error );
-			}
+				callback( error );
+			} else {
+				this.accessToken = accessToken;
+				this.fbGraph = new FbGraph( this.accessToken );
 
-			this.accessToken = accessToken;
-			this.fbGraph = new FbGraph( this.accessToken );
-			this.getRandomFriend();
+				callback();
+			}
 		} );
 	}
 
-	getRandomFriend () {
+	getRandomFriend ( callback = null ) {
 		this.fbGraph.getRandomFriendFromLatestPostsLikes( ( error, data ) => {
-			this.callback( error, data );
-			this.callback = null;
+			callback( error, data );
 		} );
 	}
 }
