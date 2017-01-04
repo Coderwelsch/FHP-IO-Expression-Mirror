@@ -86,8 +86,6 @@ class ExpressionMirror {
 				this.log( "Weather", "got weather data" );
 			}
 		} );
-
-		this.expressionShell.start
 	}
 }
 
