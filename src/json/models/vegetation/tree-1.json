@@ -1,0 +1,90 @@
+{
+	"metadata": {
+		"version": 4.4,
+		"type": "Object",
+		"generator": "Object3D.toJSON"
+	},
+	"geometries": [
+		{
+			"uuid": "7040C488-5D8F-4415-B04D-ADDFCF603B1A",
+			"type": "CylinderBufferGeometry",
+			"radiusTop": 0.2,
+			"radiusBottom": 0.24,
+			"height": 2,
+			"radialSegments": 16,
+			"heightSegments": 1,
+			"openEnded": false
+		},
+		{
+			"uuid": "38360378-8040-4155-B66B-5A634DC36942",
+			"type": "SphereBufferGeometry",
+			"radius": 1,
+			"widthSegments": 10,
+			"heightSegments": 10,
+			"phiStart": 0,
+			"phiLength": 6.283185307179586,
+			"thetaStart": 0,
+			"thetaLength": 3.141592653589793
+		}],
+	"materials": [
+		{
+			"uuid": "06A23C5D-28CC-43CD-BEAA-1DC99E53D0DA",
+			"type": "MeshStandardMaterial",
+			"color": 16766090,
+			"roughness": 0.2,
+			"metalness": 0,
+			"emissive": 0,
+			"shading": 1,
+			"depthFunc": 3,
+			"depthTest": true,
+			"depthWrite": true,
+			"skinning": false,
+			"morphTargets": false
+		},
+		{
+			"uuid": "BBE66265-584D-4E27-8514-765C6B232262",
+			"type": "MeshStandardMaterial",
+			"color": 7594310,
+			"roughness": 1,
+			"metalness": 1,
+			"emissive": 0,
+			"shading": 1,
+			"depthFunc": 3,
+			"depthTest": true,
+			"depthWrite": true,
+			"skinning": false,
+			"morphTargets": false
+		}],
+	"object": {
+		"uuid": "008D4FDA-2BBB-45BB-B644-3CF1FA58B16A",
+		"type": "Scene",
+		"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+		"children": [
+			{
+				"uuid": "0F7EFAB9-0B79-40CA-840A-327EA778FDAC",
+				"type": "Group",
+				"name": "Tree",
+				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0.9735186696052551,0,1],
+				"children": [
+					{
+						"uuid": "081CD780-C13B-4146-9DA6-8955C6EF9CB6",
+						"type": "Mesh",
+						"name": "Stem",
+						"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+						"geometry": "7040C488-5D8F-4415-B04D-ADDFCF603B1A",
+						"material": "06A23C5D-28CC-43CD-BEAA-1DC99E53D0DA"
+					},
+					{
+						"uuid": "DABCB884-C909-4942-9B78-9AAF52343931",
+						"type": "Mesh",
+						"name": "Crown",
+						"castShadow": true,
+						"receiveShadow": true,
+						"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,1.9489984512329102,0,1],
+						"geometry": "38360378-8040-4155-B66B-5A634DC36942",
+						"material": "BBE66265-584D-4E27-8514-765C6B232262"
+					}]
+			}],
+		"background": 11184810
+	}
+}

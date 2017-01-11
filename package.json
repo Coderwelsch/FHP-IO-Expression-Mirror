@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "babel-loader": "^6.2.10",
+    "json-loader": "^0.5.4",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
@@ -13,7 +15,7 @@
     "webpack": "^2.2.0-rc.3"
   },
   "scripts": {
-    "watch": "webpack --watch --config webpack.config.js",
+    "start": "webpack --watch --config webpack.config.js",
     "build": "babel ./src/js/ -d ./www/files/js/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
