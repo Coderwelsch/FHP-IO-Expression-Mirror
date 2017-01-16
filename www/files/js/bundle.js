@@ -63,17 +63,247 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(6);
+/* harmony default export */ __webpack_exports__["a"] = {
+	randomRange ( start, end ) {
+		return Math.random() * ( end - start ) + start;
+	},
+
+	merge ( geometry1, geometry2, materialIndexOffset ) {
+		console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
+
+		var matrix;
+
+		if ( geometry2 instanceof THREE.Mesh ) {
+			geometry2.matrixAutoUpdate && geometry2.updateMatrix();
+
+			matrix = geometry2.matrix;
+			geometry2 = geometry2.geometry;
+		}
+
+		geometry1.merge( geometry2, matrix, materialIndexOffset );
+	},
+
+	// Get random point in triangle (via barycentric coordinates)
+	// 	(uniform distribution)
+	// 	http://www.cgafaq.info/wiki/Random_Point_In_Triangle
+	randomPointInTriangle: function () {
+		var vector = new THREE.Vector3();
+
+		return function ( vectorA, vectorB, vectorC ) {
+			var point = new THREE.Vector3();
+			var a = Math.random();
+			var b = Math.random();
+
+			if ( ( a + b ) > 1 ) {
+				a = 1 - a;
+				b = 1 - b;
+			}
+
+			var c = 1 - a - b;
+
+			point.copy( vectorA );
+			point.multiplyScalar( a );
+
+			vector.copy( vectorB );
+			vector.multiplyScalar( b );
+
+			point.add( vector );
+
+			vector.copy( vectorC );
+			vector.multiplyScalar( c );
+
+			point.add( vector );
+
+			return point;
+		};
+	}(),
+
+	// Get random point in face (triangle)
+	// (uniform distribution)
+
+	randomPointInFace ( face, geometry ) {
+		var vA, vB, vC;
+
+		vA = geometry.vertices[ face.a ];
+		vB = geometry.vertices[ face.b ];
+		vC = geometry.vertices[ face.c ];
+
+		return this.randomPointInTriangle( vA, vB, vC );
+	},
+
+	// Get uniformly distributed random points in mesh
+	// 	- create array with cumulative sums of face areas
+	//  - pick random number from 0 to total area
+	//  - find corresponding place in area array by binary search
+	//	- get random point in face
+	randomPointsInGeometry: function ( geometry, n ) {
+		var face, i,
+			faces = geometry.faces,
+			vertices = geometry.vertices,
+			il = faces.length,
+			totalArea = 0,
+			cumulativeAreas = [],
+			vA, vB, vC;
+
+		// precompute face areas
+		for ( i = 0; i < il; i ++ ) {
+			face = faces[ i ];
+
+			vA = vertices[ face.a ];
+			vB = vertices[ face.b ];
+			vC = vertices[ face.c ];
+
+			face._area = this.triangleArea( vA, vB, vC );
+			totalArea += face._area;
+			cumulativeAreas[ i ] = totalArea;
+		}
+
+		// binary search cumulative areas array
+		function binarySearchIndices( value ) {
+			function binarySearch( start, end ) {
+				// return closest larger index
+				// if exact number is not found
+				if ( end < start )
+					return start;
+
+				var mid = start + Math.floor( ( end - start ) / 2 );
+
+				if ( cumulativeAreas[ mid ] > value ) {
+					return binarySearch( start, mid - 1 );
+				} else if ( cumulativeAreas[ mid ] < value ) {
+					return binarySearch( mid + 1, end );
+				} else {
+					return mid;
+				}
+			}
+
+			var result = binarySearch( 0, cumulativeAreas.length - 1 );
+			return result;
+		}
+
+		// pick random face weighted by face area
+		var r, index,
+			result = [];
+
+		var stats = {};
+
+		for ( i = 0; i < n; i ++ ) {
+			r = Math.random() * totalArea;
+			index = binarySearchIndices( r );
+			result[ i ] = this.randomPointInFace( faces[ index ], geometry );
+
+			if ( ! stats[ index ] ) {
+				stats[ index ] = 1;
+			} else {
+				stats[ index ] += 1;
+			}
+		}
+
+		return result;
+	},
+
+	randomPointsInBufferGeometry: function ( geometry, n ) {
+		var i,
+			vertices = geometry.attributes.position.array,
+			totalArea = 0,
+			cumulativeAreas = [],
+			vA, vB, vC;
+
+		// precompute face areas
+		vA = new THREE.Vector3();
+		vB = new THREE.Vector3();
+		vC = new THREE.Vector3();
+
+		// geometry._areas = [];
+		var il = vertices.length / 9;
+
+		for ( i = 0; i < il; i ++ ) {
+			vA.set( vertices[ i * 9 + 0 ], vertices[ i * 9 + 1 ], vertices[ i * 9 + 2 ] );
+			vB.set( vertices[ i * 9 + 3 ], vertices[ i * 9 + 4 ], vertices[ i * 9 + 5 ] );
+			vC.set( vertices[ i * 9 + 6 ], vertices[ i * 9 + 7 ], vertices[ i * 9 + 8 ] );
+
+			area = this.triangleArea( vA, vB, vC );
+			totalArea += area;
+			cumulativeAreas.push( totalArea );
+		}
+
+		// binary search cumulative areas array
+		function binarySearchIndices( value ) {
+			function binarySearch( start, end ) {
+				// return closest larger index
+				// if exact number is not found
+				if ( end < start )
+					return start;
+
+				var mid = start + Math.floor( ( end - start ) / 2 );
+
+				if ( cumulativeAreas[ mid ] > value ) {
+					return binarySearch( start, mid - 1 );
+				} else if ( cumulativeAreas[ mid ] < value ) {
+					return binarySearch( mid + 1, end );
+				} else {
+					return mid;
+				}
+			}
+
+			var result = binarySearch( 0, cumulativeAreas.length - 1 );
+			return result;
+		}
+
+		// pick random face weighted by face area
+		var r, index,
+			result = [];
+
+		for ( i = 0; i < n; i ++ ) {
+			r = Math.random() * totalArea;
+			index = binarySearchIndices( r );
+
+			vA.set( vertices[ index * 9 + 0 ], vertices[ index * 9 + 1 ], vertices[ index * 9 + 2 ] );
+			vB.set( vertices[ index * 9 + 3 ], vertices[ index * 9 + 4 ], vertices[ index * 9 + 5 ] );
+			vC.set( vertices[ index * 9 + 6 ], vertices[ index * 9 + 7 ], vertices[ index * 9 + 8 ] );
+			result[ i ] = this.randomPointInTriangle( vA, vB, vC );
+		}
+
+		return result;
+	},
+
+	// Get triangle area (half of parallelogram)
+	// http://mathworld.wolfram.com/TriangleArea.html
+	triangleArea: function () {
+		var vector1 = new THREE.Vector3();
+		var vector2 = new THREE.Vector3();
+
+		return function ( vectorA, vectorB, vectorC ) {
+			vector1.subVectors( vectorB, vectorA );
+			vector2.subVectors( vectorC, vectorA );
+			vector1.cross( vector2 );
+
+			return 0.5 * vector1.length();
+		};
+	}(),
+
+	center: function ( geometry ) {
+		console.warn( 'THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.' );
+		return geometry.center();
+	}
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Controls_js__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__models_Models_js__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__models_Models_js__ = __webpack_require__(4);
 // imports
 
 
@@ -232,12 +462,12 @@ class World {
 		} );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = World;
+/* harmony export (immutable) */ __webpack_exports__["a"] = World;
 
 
-/***/ },
-/* 1 */
-/***/ function(module, exports) {
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
 
 module.exports = {
 	"metadata": {
@@ -19190,9 +19420,9 @@ module.exports = {
 	]
 };
 
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
 
 module.exports = {
 	"metadata": {
@@ -19357,9 +19587,9 @@ module.exports = {
 	}
 };
 
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 const RootAssetsPath = "./files/textures/models/";
@@ -19370,11 +19600,11 @@ let objectLoader = new THREE.ObjectLoader(),
 	models = {
 		vegetation: {
 			trees: {
-				Tree1: __webpack_require__( 2 )
+				Tree1: __webpack_require__( 3 )
 			}
 		},
 		birds: {
-			Flamingo: __webpack_require__( 1 )
+			Flamingo: __webpack_require__( 2 )
 		}
 	};
 
@@ -19391,242 +19621,12 @@ class Models {
 		return objectLoader.parse( model );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Models;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Models;
 
 
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ exports["a"] = {
-	randomRange ( start, end ) {
-		return Math.random() * ( end - start ) + start;
-	},
-
-	merge ( geometry1, geometry2, materialIndexOffset ) {
-		console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
-
-		var matrix;
-
-		if ( geometry2 instanceof THREE.Mesh ) {
-			geometry2.matrixAutoUpdate && geometry2.updateMatrix();
-
-			matrix = geometry2.matrix;
-			geometry2 = geometry2.geometry;
-		}
-
-		geometry1.merge( geometry2, matrix, materialIndexOffset );
-	},
-
-	// Get random point in triangle (via barycentric coordinates)
-	// 	(uniform distribution)
-	// 	http://www.cgafaq.info/wiki/Random_Point_In_Triangle
-	randomPointInTriangle: function () {
-		var vector = new THREE.Vector3();
-
-		return function ( vectorA, vectorB, vectorC ) {
-			var point = new THREE.Vector3();
-			var a = Math.random();
-			var b = Math.random();
-
-			if ( ( a + b ) > 1 ) {
-				a = 1 - a;
-				b = 1 - b;
-			}
-
-			var c = 1 - a - b;
-
-			point.copy( vectorA );
-			point.multiplyScalar( a );
-
-			vector.copy( vectorB );
-			vector.multiplyScalar( b );
-
-			point.add( vector );
-
-			vector.copy( vectorC );
-			vector.multiplyScalar( c );
-
-			point.add( vector );
-
-			return point;
-		};
-	}(),
-
-	// Get random point in face (triangle)
-	// (uniform distribution)
-
-	randomPointInFace ( face, geometry ) {
-		var vA, vB, vC;
-
-		vA = geometry.vertices[ face.a ];
-		vB = geometry.vertices[ face.b ];
-		vC = geometry.vertices[ face.c ];
-
-		return this.randomPointInTriangle( vA, vB, vC );
-	},
-
-	// Get uniformly distributed random points in mesh
-	// 	- create array with cumulative sums of face areas
-	//  - pick random number from 0 to total area
-	//  - find corresponding place in area array by binary search
-	//	- get random point in face
-	randomPointsInGeometry: function ( geometry, n ) {
-		var face, i,
-			faces = geometry.faces,
-			vertices = geometry.vertices,
-			il = faces.length,
-			totalArea = 0,
-			cumulativeAreas = [],
-			vA, vB, vC;
-
-		// precompute face areas
-		for ( i = 0; i < il; i ++ ) {
-			face = faces[ i ];
-
-			vA = vertices[ face.a ];
-			vB = vertices[ face.b ];
-			vC = vertices[ face.c ];
-
-			face._area = this.triangleArea( vA, vB, vC );
-			totalArea += face._area;
-			cumulativeAreas[ i ] = totalArea;
-		}
-
-		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
-				// return closest larger index
-				// if exact number is not found
-				if ( end < start )
-					return start;
-
-				var mid = start + Math.floor( ( end - start ) / 2 );
-
-				if ( cumulativeAreas[ mid ] > value ) {
-					return binarySearch( start, mid - 1 );
-				} else if ( cumulativeAreas[ mid ] < value ) {
-					return binarySearch( mid + 1, end );
-				} else {
-					return mid;
-				}
-			}
-
-			var result = binarySearch( 0, cumulativeAreas.length - 1 );
-			return result;
-		}
-
-		// pick random face weighted by face area
-		var r, index,
-			result = [];
-
-		var stats = {};
-
-		for ( i = 0; i < n; i ++ ) {
-			r = Math.random() * totalArea;
-			index = binarySearchIndices( r );
-			result[ i ] = this.randomPointInFace( faces[ index ], geometry );
-
-			if ( ! stats[ index ] ) {
-				stats[ index ] = 1;
-			} else {
-				stats[ index ] += 1;
-			}
-		}
-
-		return result;
-	},
-
-	randomPointsInBufferGeometry: function ( geometry, n ) {
-		var i,
-			vertices = geometry.attributes.position.array,
-			totalArea = 0,
-			cumulativeAreas = [],
-			vA, vB, vC;
-
-		// precompute face areas
-		vA = new THREE.Vector3();
-		vB = new THREE.Vector3();
-		vC = new THREE.Vector3();
-
-		// geometry._areas = [];
-		var il = vertices.length / 9;
-
-		for ( i = 0; i < il; i ++ ) {
-			vA.set( vertices[ i * 9 + 0 ], vertices[ i * 9 + 1 ], vertices[ i * 9 + 2 ] );
-			vB.set( vertices[ i * 9 + 3 ], vertices[ i * 9 + 4 ], vertices[ i * 9 + 5 ] );
-			vC.set( vertices[ i * 9 + 6 ], vertices[ i * 9 + 7 ], vertices[ i * 9 + 8 ] );
-
-			area = this.triangleArea( vA, vB, vC );
-			totalArea += area;
-			cumulativeAreas.push( totalArea );
-		}
-
-		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
-				// return closest larger index
-				// if exact number is not found
-				if ( end < start )
-					return start;
-
-				var mid = start + Math.floor( ( end - start ) / 2 );
-
-				if ( cumulativeAreas[ mid ] > value ) {
-					return binarySearch( start, mid - 1 );
-				} else if ( cumulativeAreas[ mid ] < value ) {
-					return binarySearch( mid + 1, end );
-				} else {
-					return mid;
-				}
-			}
-
-			var result = binarySearch( 0, cumulativeAreas.length - 1 );
-			return result;
-		}
-
-		// pick random face weighted by face area
-		var r, index,
-			result = [];
-
-		for ( i = 0; i < n; i ++ ) {
-			r = Math.random() * totalArea;
-			index = binarySearchIndices( r );
-
-			vA.set( vertices[ index * 9 + 0 ], vertices[ index * 9 + 1 ], vertices[ index * 9 + 2 ] );
-			vB.set( vertices[ index * 9 + 3 ], vertices[ index * 9 + 4 ], vertices[ index * 9 + 5 ] );
-			vC.set( vertices[ index * 9 + 6 ], vertices[ index * 9 + 7 ], vertices[ index * 9 + 8 ] );
-			result[ i ] = this.randomPointInTriangle( vA, vB, vC );
-		}
-
-		return result;
-	},
-
-	// Get triangle area (half of parallelogram)
-	// http://mathworld.wolfram.com/TriangleArea.html
-	triangleArea: function () {
-		var vector1 = new THREE.Vector3();
-		var vector2 = new THREE.Vector3();
-
-		return function ( vectorA, vectorB, vectorC ) {
-			vector1.subVectors( vectorB, vectorA );
-			vector2.subVectors( vectorC, vectorA );
-			vector1.cross( vector2 );
-
-			return 0.5 * vector1.length();
-		};
-	}(),
-
-	center: function ( geometry ) {
-		console.warn( 'THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.' );
-		return geometry.center();
-	}
-};
-
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 class Controls {
@@ -19635,17 +19635,119 @@ class Controls {
 		this.controls = new THREE.OrbitControls( this.camera );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Controls;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Controls;
 
 
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__FloraAndFauna_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(0);
+
+
+
+class FloraAndFauna {
+	constructor ( globe ) {
+		this.globe = globe;
+		this.globeGroup = this.globe.globeGroup;
+		this.globeRadius = this.globe.globeRadius;
+		this.mixers = this.globe.mixers;
+		this.models = this.globe.models;
+
+		this.groupFlamingos = null;
+
+		this.createFauna();
+	}
+
+	createFauna () {
+		this.createBirds();
+	}
+
+	createBirds () {
+		this.createFlamingos();
+	}
+
+	createFlamingos () {
+		let countFlamingos = 20;
+
+		this.groupFlamingos = new Array( countFlamingos );
+		for ( let i = 0; i < countFlamingos; i++ ) {
+			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
+				flamingoMinScaling = 0.03,
+				flamingoMaxScaling = 0.05,
+				flamingoScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
+				flightHeightMinOffset = 0.15,
+				flightHeightMaxOffset = 0.25,
+				flamingoMaterial,
+				flamingoMesh,
+				mixer,
+				originGroup = new THREE.Object3D();
+
+			flamingoMaterial = new THREE.MeshPhongMaterial( {
+				color: 0xffffff,
+				specular: 0xffffff,
+				shininess: 20,
+				morphTargets: true,
+				vertexColors: THREE.FaceColors,
+				shading: THREE.FlatShading
+			} );
+
+			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
+			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
+			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
+			flamingoMesh.castShadow = true;
+			flamingoMesh.name = `Flamingo [${ i }]`;
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+			originGroup.name = `Origin Group Flamingo [${ i }]`;
+			originGroup.add( flamingoMesh );
+
+			this.groupFlamingos[ i ] = originGroup;
+			this.globeGroup.add( originGroup );
+
+			mixer = new THREE.AnimationMixer( flamingoMesh );
+			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1  ).play();
+			this.mixers.push( mixer );
+		}
+	}
+
+	render () {
+		let bird,
+			oldPosition,
+			newPosition,
+			finalPosition;
+
+		for ( let group of this.groupFlamingos ) {
+			bird = group.children[ 0 ];
+
+			oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
+
+			group.rotation.x += 0.005;
+			group.rotation.y += 0.005;
+			group.rotation.z += 0.005;
+			group.updateMatrixWorld();
+
+			newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
+			finalPosition = group.worldToLocal( newPosition );
+
+			bird.lookAt( finalPosition );
+		}
+	}
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = FloraAndFauna;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__FloraAndFauna_js__ = __webpack_require__(6);
 // imports
 
 
@@ -19809,16 +19911,16 @@ class Globe {
 		this.floraAndFauna.render();
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Globe;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Globe;
 
 
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(0);
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(1);
 // imports
 
 
@@ -19828,114 +19930,5 @@ let world = new __WEBPACK_IMPORTED_MODULE_0__world_World_js__["a" /* default */]
 // debug
 window.scene = world.scene;
 
-/***/ },
-/* 8 */,
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(4);
-
-
-
-class FloraAndFauna {
-	constructor ( globe ) {
-		this.globe = globe;
-		this.globeGroup = this.globe.globeGroup;
-		this.globeRadius = this.globe.globeRadius;
-		this.mixers = this.globe.mixers;
-		this.models = this.globe.models;
-
-		this.groupFlamingos = null;
-
-		this.createFauna();
-	}
-
-	createFauna () {
-		this.createBirds();
-	}
-
-	createBirds () {
-		this.createFlamingos();
-	}
-
-	createFlamingos () {
-		let countFlamingos = 20;
-
-		this.groupFlamingos = new Array( countFlamingos );
-		for ( let i = 0; i < countFlamingos; i++ ) {
-			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
-				flamingoMinScaling = 0.03,
-				flamingoMaxScaling = 0.05,
-				flamingoScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
-				flightHeightMinOffset = 0.15,
-				flightHeightMaxOffset = 0.25,
-				flamingoMaterial,
-				flamingoMesh,
-				mixer,
-				randomPlayDelay = 1,
-				originGroup = new THREE.Object3D();
-
-			flamingoMaterial = new THREE.MeshPhongMaterial( {
-				color: 0xffffff,
-				specular: 0xffffff,
-				shininess: 20,
-				morphTargets: true,
-				vertexColors: THREE.FaceColors,
-				shading: THREE.FlatShading
-			} );
-
-			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
-			flamingoMesh.scale.set( flamingoScale, flamingoScale, flamingoScale );
-			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
-			flamingoMesh.rotation.y = -1;
-			flamingoMesh.castShadow = true;
-			// flamingoMesh.receiveShadow = true;
-			flamingoMesh.name = `Flamingo [${ i }]`;
-
-			originGroup.rotation.x = Math.PI * Math.random();
-			originGroup.rotation.y = Math.PI * Math.random();
-			originGroup.rotation.z = Math.PI * Math.random();
-			originGroup.name = `Origin Group Flamingo [${ i }]`;
-			originGroup.add( flamingoMesh );
-			this.groupFlamingos[ i ] = originGroup;
-			this.globeGroup.add( originGroup );
-
-			mixer = new THREE.AnimationMixer( flamingoMesh );
-			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( randomPlayDelay ).play();
-			this.mixers.push( mixer );
-		}
-	}
-
-	render () {
-		let bird,
-			oldPosition,
-			newPosition;
-
-		for ( let group of this.groupFlamingos ) {
-			bird = group.children[ 0 ];
-
-			oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
-
-			group.rotation.x += 0.005;
-			group.rotation.y += 0.005;
-			group.rotation.z += 0.005;
-
-			// bird.rotation.y = group.rotation.y;
-
-			// newPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
-			// bird.lookAt( group.worldToLocal( newPosition ) );
-			// group.updateMatrixWorld();
-
-			// console.log( bird.name, newPosition.x - oldPosition.x, newPosition.y - oldPosition.y, newPosition.z - oldPosition.z );
-			// console.log( oldPosition );
-
-			// break;
-		}
-	}
-}
-/* harmony export (immutable) */ exports["a"] = FloraAndFauna;
-
-
-/***/ }
+/***/ })
 /******/ ]);

@@ -36,7 +36,6 @@ export default class FloraAndFauna {
 				flamingoMaterial,
 				flamingoMesh,
 				mixer,
-				randomPlayDelay = 1,
 				originGroup = new THREE.Object3D();
 
 			flamingoMaterial = new THREE.MeshPhongMaterial( {
@@ -49,11 +48,9 @@ export default class FloraAndFauna {
 			} );
 
 			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
-			flamingoMesh.scale.set( flamingoScale, flamingoScale, flamingoScale );
+			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
 			flamingoMesh.position.y = this.globeRadius * ( 1 + Utils.randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
-			flamingoMesh.rotation.y = -1;
 			flamingoMesh.castShadow = true;
-			// flamingoMesh.receiveShadow = true;
 			flamingoMesh.name = `Flamingo [${ i }]`;
 
 			originGroup.rotation.x = Math.PI * Math.random();
@@ -61,11 +58,12 @@ export default class FloraAndFauna {
 			originGroup.rotation.z = Math.PI * Math.random();
 			originGroup.name = `Origin Group Flamingo [${ i }]`;
 			originGroup.add( flamingoMesh );
+
 			this.groupFlamingos[ i ] = originGroup;
 			this.globeGroup.add( originGroup );
 
 			mixer = new THREE.AnimationMixer( flamingoMesh );
-			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( randomPlayDelay ).play();
+			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1  ).play();
 			this.mixers.push( mixer );
 		}
 	}
@@ -73,7 +71,8 @@ export default class FloraAndFauna {
 	render () {
 		let bird,
 			oldPosition,
-			newPosition;
+			newPosition,
+			finalPosition;
 
 		for ( let group of this.groupFlamingos ) {
 			bird = group.children[ 0 ];
@@ -83,17 +82,12 @@ export default class FloraAndFauna {
 			group.rotation.x += 0.005;
 			group.rotation.y += 0.005;
 			group.rotation.z += 0.005;
+			group.updateMatrixWorld();
 
-			// bird.rotation.y = group.rotation.y;
+			newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
+			finalPosition = group.worldToLocal( newPosition );
 
-			// newPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
-			// bird.lookAt( group.worldToLocal( newPosition ) );
-			// group.updateMatrixWorld();
-
-			// console.log( bird.name, newPosition.x - oldPosition.x, newPosition.y - oldPosition.y, newPosition.z - oldPosition.z );
-			// console.log( oldPosition );
-
-			// break;
+			bird.lookAt( finalPosition );
 		}
 	}
 }
