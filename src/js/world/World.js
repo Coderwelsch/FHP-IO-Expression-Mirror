@@ -5,8 +5,12 @@ import Models from "../models/Models.js";
 
 
 export default class World {
-	constructor () {
+	constructor ( mood = 0, globeRadius = 50, cameraOffset = 120 ) {
 		// properties
+		this.mood = mood;
+		this.globeRadius = globeRadius;
+		this.cameraOffset = cameraOffset;
+
 		this.ratio = window.devicePixelRatio;
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
@@ -39,12 +43,14 @@ export default class World {
 		// camera
 		this.camera = new THREE.PerspectiveCamera( 45, this.width / this.height, 0.1, 3000 );
 		this.camera.name = "Camera";
-		this.camera.position.set( 0, 0, 15 );
+		this.camera.position.set( 0, 0, this.globeRadius + this.cameraOffset );
 		this.scene.add( this.camera );
 
 		// renderer
 		this.renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true, shadowMapEnabled: true } );
 		this.renderer.name = "RENDERER";
+		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.renderReverseSided = false;
 		this.renderer.setClearColor( 0x333F47, 1 );
 		this.updateRendererSize();
 
@@ -63,29 +69,35 @@ export default class World {
 	}
 
 	initLightning () {
+		// hemisphere light
 		this.hemisphereLight = new THREE.HemisphereLight( 0xFFFFFF, 0x111111, 0.9 );
+		this.hemisphereLight.name = "Hemispere Light";
 		this.scene.add( this.hemisphereLight );
 
 		// shadow light
+		let shadowCameraPos = 40;
 		this.shadowLight = new THREE.DirectionalLight( 0xFFFFFF, 0.5 );
 
 		this.shadowLight.position.set( 0, 0, 650 );
 		this.shadowLight.castShadow = true;
-		this.shadowLight.shadow.camera.left = -400;
-		this.shadowLight.shadow.camera.right = 400;
-		this.shadowLight.shadow.camera.top = 400;
-		this.shadowLight.shadow.camera.bottom = -400;
+		this.shadowLight.shadowCameraVisible = true;
+		this.shadowLight.shadow.camera.left = -shadowCameraPos;
+		this.shadowLight.shadow.camera.right = shadowCameraPos;
+		this.shadowLight.shadow.camera.top = shadowCameraPos;
+		this.shadowLight.shadow.camera.bottom = -shadowCameraPos;
 		this.shadowLight.shadow.camera.near = 1;
-		this.shadowLight.shadow.camera.far = 1000;
+		this.shadowLight.shadow.camera.far = 2000;
 
 		this.shadowLight.shadow.mapSize.width = 2048;
 		this.shadowLight.shadow.mapSize.height = 2048;
+
+		this.shadowLight.name = "Directional Light";
 
 		this.scene.add( this.shadowLight );
 	}
 
 	initWorld () {
-		this.globe = new Globe( this.scene, this.models );
+		this.globe = new Globe( this.scene, this.models, this.globeRadius );
 		this.objectsToRender.push( this.globe );
 	}
 

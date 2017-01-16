@@ -1,9 +1,10 @@
 // imports
 import Utils from "../utils/Utils.js";
+import Vegetation from "./FloraAndFauna.js";
 
 
 export default class Globe {
-	constructor ( scene, models ) {
+	constructor ( scene, models, globeRadius = 50, mood = 0 ) {
 		this.textures = {
 			fertile: "./files/textures/ground-texture.jpg",
 			desert: "./files/textures/desert-texture.jpg",
@@ -14,11 +15,17 @@ export default class Globe {
 		this.globeGroup = new THREE.Object3D();
 		this.globeGroup.name = "Globe Group";
 
-		this.globeRadius = 5;
-		this.globePolygons = 64;
-		this.globePolygonTransformMultiplier = 0.1;
+		this.mood = mood;
 
+		this.floraAndFauna = null;
+
+		this.globeRadius = globeRadius;
+		this.globePolygons = 64;
+		this.globePolygonTransformMultiplier = 1.5;
+
+		this.clock = new THREE.Clock();
 		this.scene = scene;
+		this.mixers = [];
 		this.models = models;
 
 		this.init();
@@ -53,14 +60,12 @@ export default class Globe {
 			map: this.globeTexture,
 			color: 0xf5cda2,
 			roughness: 0.5,
-			metalness: 0.1 //,
-			// shading: THREE.FlatShading
+			metalness: 0.1
 		} );
 
 		// final mesh
 		this.globeMesh = new THREE.Mesh( this.globeGeometry, this.globeMaterial );
 		this.globeMesh.name = "Globe";
-		this.globeMesh.castShadow = true;
 		this.globeMesh.receiveShadow = true;
 
 		this.globeGroup.add( this.globeMesh );
@@ -73,7 +78,7 @@ export default class Globe {
 	}
 
 	createWaterSurface () {
-		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 0.15, this.globePolygons, this.globePolygons );
+		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 2.1, this.globePolygons, this.globePolygons );
 
 		this.waterSurfaceMaterial = new THREE.MeshStandardMaterial( {
 			color: 0x68c3c0,
@@ -83,6 +88,8 @@ export default class Globe {
 		} );
 
 		this.waterSurfaceMesh = new THREE.Mesh( this.waterSurfaceGeometry, this.waterSurfaceMaterial );
+		// this.waterSurfaceMesh.castShadow = true;
+		// this.waterSurfaceMesh.receiveShadow = true;
 		this.waterSurfaceMesh.name = "Globe Water Surface";
 		this.globeGroup.add( this.waterSurfaceMesh );
 	}
@@ -95,24 +102,7 @@ export default class Globe {
 	}
 
 	createVegetation () {
-		for ( let i = 0; i < 1000; i++ ) {
-			console.log( this.models.models.birds.Flamingo );
-
-			let simpleTree = this.models.getModel( this.models.models.birds.Flamingo ),
-				originGroup = new THREE.Object3D();
-
-			simpleTree.position.y = this.globeRadius + 0.5;
-			simpleTree.scale.set( 0.2, 0.2, 0.2 );
-			simpleTree.castShadow = true;
-			simpleTree.receiveShadow = true;
-
-			originGroup.rotation.x = Math.PI * Math.random();
-			originGroup.rotation.y = Math.PI * Math.random();
-			originGroup.rotation.z = Math.PI * Math.random();
-			originGroup.add( simpleTree );
-
-			this.globeGroup.add( originGroup );
-		}
+		this.floraAndFauna = new Vegetation( this );
 	}
 
 	addHoles () {
@@ -122,12 +112,12 @@ export default class Globe {
 			numberOfHoles = Math.round( Utils.randomRange( 3, 6 ) );
 
 		for ( let i = 0; i < numberOfHoles; i++ ) {
-			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length ) ];
+			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length, 10 ) ];
 
-			nearVeticesIndexes = this.findIndexesOfNearVertices( globeVertices, randomVertexPoint );
+			nearVeticesIndexes = Globe.findIndexesOfNearVertices( globeVertices, randomVertexPoint );
 			for ( let k = 0; k < nearVeticesIndexes.length; k++ ) {
 				verticeIndex = nearVeticesIndexes[ k ];
-				globeVertices[ verticeIndex ] = this.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
+				globeVertices[ verticeIndex ] = Globe.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
 			}
 		}
 	}
@@ -142,11 +132,11 @@ export default class Globe {
 		}
 	}
 
-	moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
+	static moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
 		return pointVector.lerp( originVector, alpha );
 	}
 
-	findIndexesOfNearVertices ( vertices = [], pointVector, distThreshold = 1 ) {
+	static findIndexesOfNearVertices ( vertices = [], pointVector, distThreshold = 10 ) {
 		let foundVertices = [];
 
 		for ( let i = 0; i < vertices.length; i++ ) {
@@ -162,5 +152,12 @@ export default class Globe {
 		this.globeGroup.rotation.x += 0.001;
 		this.globeGroup.rotation.y += 0.001;
 		this.globeGroup.rotation.z += 0.001;
+
+		let delta = this.clock.getDelta();
+		for ( let i = 0; i < this.mixers.length; i ++ ) {
+			this.mixers[ i ].update( delta );
+		}
+
+		this.floraAndFauna.render();
 	}
 }

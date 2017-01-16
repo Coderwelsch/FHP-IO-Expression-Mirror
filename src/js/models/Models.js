@@ -19,7 +19,11 @@ export default class Models {
 		this.models = models;
 	}
 
-	getModel ( model ) {
+	getModelJson ( model ) {
+		return jsonLoader.parse( model );
+	}
+
+	getModelObject ( model ) {
 		return objectLoader.parse( model );
 	}
 }
