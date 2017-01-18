@@ -8,14 +8,20 @@ export default class FloraAndFauna {
 		this.globeRadius = this.globe.globeRadius;
 		this.mixers = this.globe.mixers;
 		this.models = this.globe.models;
+		this.textures = this.globe.textures;
 
 		this.groupFlamingos = null;
 
 		this.createFauna();
+		this.createFlora();
 	}
 
 	createFauna () {
 		this.createBirds();
+	}
+
+	createFlora () {
+		this.createTrees();
 	}
 
 	createBirds () {
@@ -66,6 +72,30 @@ export default class FloraAndFauna {
 			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1  ).play();
 			this.mixers.push( mixer );
 		}
+	}
+
+	createTrees () {
+		let treeMesh = this.models.getModelObject( this.models.models.vegetation.trees.TreeDead ),
+			treeMaterial,
+			deadTreeTexture,
+			deadTreeBump;
+
+		deadTreeTexture = new THREE.TextureLoader().load( this.textures.bark );
+		deadTreeBump = new THREE.TextureLoader().load( this.textures.barkBump );
+
+		treeMaterial = new THREE.MeshPhongMaterial( {
+			specular: 0xFFFFFF,
+			bumpMap: deadTreeBump,
+			bumpScale: 0.01,
+			map: deadTreeTexture,
+			shininess: 0,
+			metalness: 0,
+			shading: THREE.FlatShading
+		} );
+
+		Utils.setDeepMaterial( treeMesh, treeMaterial );
+		treeMesh.position.y = this.globeRadius;
+		this.globeGroup.add( treeMesh );
 	}
 
 	render () {

@@ -3,6 +3,16 @@ export default {
 		return Math.random() * ( end - start ) + start;
 	},
 
+	setDeepMaterial ( object, value ) {
+		if ( object.children && object.children.length ) {
+			for ( let item of object.children ) {
+				this.setDeepMaterial( item, value );
+			}
+		} else if ( "material" in object ) {
+			object.material = value;
+		}
+	},
+
 	merge ( geometry1, geometry2, materialIndexOffset ) {
 		console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
 

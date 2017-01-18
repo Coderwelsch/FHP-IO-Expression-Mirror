@@ -7,9 +7,14 @@ export default class Globe {
 	constructor ( scene, models, globeRadius = 50, mood = 0 ) {
 		this.textures = {
 			fertile: "./files/textures/ground-texture.jpg",
+
 			desert: "./files/textures/desert-texture.jpg",
 			desertBump: "./files/textures/desert-texture-bump.jpg",
-			sand: "./files/textures/sand-texture.jpg"
+
+			sand: "./files/textures/sand-texture.jpg",
+
+			bark: "./files/textures/bark-texture.jpg",
+			barkBump: "./files/textures/bark-texture-bump.jpg"
 		};
 
 		this.globeGroup = new THREE.Object3D();

@@ -6,7 +6,8 @@ let objectLoader = new THREE.ObjectLoader(),
 	models = {
 		vegetation: {
 			trees: {
-				Tree1: require( "../../json/models/vegetation/tree-1.json" )
+				Tree1: require( "../../json/models/vegetation/tree-1.json" ),
+				TreeDead: require( "../../json/models/vegetation/tree-dead.json" )
 			}
 		},
 		birds: {
