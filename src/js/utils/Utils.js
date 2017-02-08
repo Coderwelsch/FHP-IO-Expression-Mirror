@@ -13,8 +13,24 @@ export default {
 		}
 	},
 
+	moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
+		return pointVector.lerp( originVector, alpha );
+	},
+
+	findIndexesOfNearVertices ( vertices = [], pointVector, distThreshold = 10 ) {
+		let foundVertices = [];
+
+		for ( let i = 0; i < vertices.length; i++ ) {
+			if ( pointVector.distanceTo( vertices[ i ] ) < distThreshold ) {
+				foundVertices.push( i );
+			}
+		}
+
+		return foundVertices;
+	},
+
 	merge ( geometry1, geometry2, materialIndexOffset ) {
-		console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
+		window.console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
 
 		var matrix;
 

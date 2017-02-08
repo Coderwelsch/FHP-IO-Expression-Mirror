@@ -1,5 +1,8 @@
+/* global THREE */
+
 // imports
 import Globe from "./Globe.js";
+import GlobeMoodController from "../controller/GlobeMoodController.js";
 import Controls from "./Controls.js";
 import Models from "../models/Models.js";
 
@@ -26,6 +29,7 @@ export default class World {
 		this.controls = null;
 
 		this.globe = null;
+		this.globeMoodController = null;
 
 		this.objectsToRender = [];
 
@@ -66,6 +70,12 @@ export default class World {
 		// init world
 		this.initLightning();
 		this.initWorld();
+		this.initGlobeMoodStateController();
+	}
+
+	initGlobeMoodStateController () {
+		this.globeMoodController = new GlobeMoodController( this.globe, this.mood );
+		this.objectsToRender.push( this.globeMoodController );
 	}
 
 	initLightning () {

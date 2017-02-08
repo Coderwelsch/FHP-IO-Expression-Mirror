@@ -1,3 +1,4 @@
+/* globals THREE */
 const RootAssetsPath = "./files/textures/models/";
 
 

@@ -1,9 +1,13 @@
+/* global THREE */
+
+// imports
+import Animation from "../animation/Animation.js";
 import Utils from "../utils/Utils.js";
 
 
 export default class FloraAndFauna {
-	constructor ( globe ) {
-		this.globe = globe;
+	constructor ( globeReference ) {
+		this.globe = globeReference;
 		this.globeGroup = this.globe.globeGroup;
 		this.globeRadius = this.globe.globeRadius;
 		this.mixers = this.globe.mixers;
@@ -11,9 +15,69 @@ export default class FloraAndFauna {
 		this.textures = this.globe.textures;
 
 		this.groupFlamingos = null;
+		this.animation = new Animation();
+	}
 
-		this.createFauna();
-		this.createFlora();
+	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
+		let clonedGlobeMesh = this.globe.globeMesh.clone(),
+			texturePath = textureObj.texture || textureObj,
+			newTexture,
+			bumpMap,
+			newMaterial;
+
+		// set original globe to the new texture and hide it
+		newTexture = new THREE.TextureLoader().load( texturePath );
+
+		if ( repeation > 1 ) {
+			newTexture.wrapS = THREE.RepeatWrapping;
+			newTexture.wrapT = THREE.RepeatWrapping;
+			newTexture.repeat.set( repeation, repeation );
+		}
+
+		if ( useBumpMap ) {
+			bumpMap = new THREE.TextureLoader().load( this.textures.desertBump );
+			bumpMap.wrapS = THREE.RepeatWrapping;
+			bumpMap.wrapT = THREE.RepeatWrapping;
+			bumpMap.repeat.set( repeation, repeation );
+		}
+
+		newMaterial = new THREE.MeshStandardMaterial( {
+			bumpMap: bumpMap,
+			bumpScale: bumpMap ? bumpScale : undefined,
+			map: newTexture,
+			opacity: 0,
+			transparent: true,
+			color: 0xf5cda2,
+			roughness: 0.5,
+			metalness: 0.1
+		} );
+
+		this.globe.globeMesh.material = newMaterial;
+		this.globe.globeMesh.geometry.uvsNeedUpdate = true;
+		this.globe.globeMesh.needUpdate = true;
+
+		// add cloned globe and fade it out
+		this.globeGroup.add( clonedGlobeMesh );
+		this.animation.fadeOut( clonedGlobeMesh, () => {
+			this.globeGroup.remove( clonedGlobeMesh );
+		} );
+		this.animation.fadeIn( this.globe.globeMesh );
+	}
+
+	changeWaterLevel ( waterLevel ) {
+		Velocity( { opacity: 1 }, {
+			opacity: 0
+		}, {
+			duration: 3000,
+			progress: function(elements, complete, remaining, start, tweenValue) {
+				console.log((complete * 100) + "%");
+				console.log(remaining + "ms remaining!");
+				console.log("The current tween value is " + tweenValue)
+			}
+		});
+		/*this.animation.scale( waterLevel, this.globe.waterSurfaceMesh, () => {
+			console.log("DONE");
+		} );*/
 	}
 
 	createFauna () {
@@ -98,26 +162,33 @@ export default class FloraAndFauna {
 		this.globeGroup.add( treeMesh );
 	}
 
-	render () {
-		let bird,
-			oldPosition,
-			newPosition,
-			finalPosition;
+	renderFlamingos () {
+		if ( this.groupFlamingos ) {
+			let bird,
+				oldPosition,
+				newPosition,
+				finalPosition;
 
-		for ( let group of this.groupFlamingos ) {
-			bird = group.children[ 0 ];
+			for ( let group of this.groupFlamingos ) {
+				bird = group.children[ 0 ];
 
-			oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
+				oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
 
-			group.rotation.x += 0.005;
-			group.rotation.y += 0.005;
-			group.rotation.z += 0.005;
-			group.updateMatrixWorld();
+				group.rotation.x += 0.005;
+				group.rotation.y += 0.005;
+				group.rotation.z += 0.005;
+				group.updateMatrixWorld();
 
-			newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
-			finalPosition = group.worldToLocal( newPosition );
+				newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
+				finalPosition = group.worldToLocal( newPosition );
 
-			bird.lookAt( finalPosition );
+				bird.lookAt( finalPosition );
+			}
 		}
+	}
+
+	render () {
+		this.animation.render();
+		// this.renderFlamingos();
 	}
 }

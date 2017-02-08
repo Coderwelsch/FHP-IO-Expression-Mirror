@@ -1,28 +1,13 @@
+/* global THREE */
+
 // imports
 import Utils from "../utils/Utils.js";
-import Vegetation from "./FloraAndFauna.js";
 
 
 export default class Globe {
-	constructor ( scene, models, globeRadius = 50, mood = 0 ) {
-		this.textures = {
-			fertile: "./files/textures/ground-texture.jpg",
-
-			desert: "./files/textures/desert-texture.jpg",
-			desertBump: "./files/textures/desert-texture-bump.jpg",
-
-			sand: "./files/textures/sand-texture.jpg",
-
-			bark: "./files/textures/bark-texture.jpg",
-			barkBump: "./files/textures/bark-texture-bump.jpg"
-		};
-
+	constructor ( scene, models, globeRadius = 50 ) {
 		this.globeGroup = new THREE.Object3D();
 		this.globeGroup.name = "Globe Group";
-
-		this.mood = mood;
-
-		this.floraAndFauna = null;
 
 		this.globeRadius = globeRadius;
 		this.globePolygons = 64;
@@ -39,31 +24,16 @@ export default class Globe {
 	init () {
 		this.createGlobe();
 		this.createWaterSurface();
-		this.createVegetation();
 	}
 
 	createGlobe () {
 		this.globeGeometry = new THREE.SphereGeometry( this.globeRadius, this.globePolygons, this.globePolygons );
 		this.globeGeometry.mergeVertices();
 
-		// globe main texture
-		this.globeTexture = new THREE.TextureLoader().load( this.textures.desert );
-		this.globeTexture.wrapS = THREE.RepeatWrapping;
-		this.globeTexture.wrapT = THREE.RepeatWrapping;
-		this.globeTexture.repeat.set( 5, 5 );
-
-		// bump map
-		this.globeBumpMap = new THREE.TextureLoader().load( this.textures.desertBump );
-		this.globeBumpMap.wrapS = THREE.RepeatWrapping;
-		this.globeBumpMap.wrapT = THREE.RepeatWrapping;
-		this.globeBumpMap.repeat.set( 5, 5 );
-
-		// globe material
+		// initial globe material
 		this.globeMaterial = new THREE.MeshStandardMaterial( {
-			bumpMap: this.globeBumpMap,
-			bumpScale: 0.02,
-			map: this.globeTexture,
 			color: 0xf5cda2,
+			transparent: true,
 			roughness: 0.5,
 			metalness: 0.1
 		} );
@@ -93,8 +63,6 @@ export default class Globe {
 		} );
 
 		this.waterSurfaceMesh = new THREE.Mesh( this.waterSurfaceGeometry, this.waterSurfaceMaterial );
-		// this.waterSurfaceMesh.castShadow = true;
-		// this.waterSurfaceMesh.receiveShadow = true;
 		this.waterSurfaceMesh.name = "Globe Water Surface";
 		this.globeGroup.add( this.waterSurfaceMesh );
 	}
@@ -106,10 +74,6 @@ export default class Globe {
 		this.globeMesh.geometry.verticesNeedUpdate = true;
 	}
 
-	createVegetation () {
-		this.floraAndFauna = new Vegetation( this );
-	}
-
 	addHoles () {
 		let globeVertices = this.globeMesh.geometry.vertices,
 			nearVeticesIndexes,
@@ -119,10 +83,10 @@ export default class Globe {
 		for ( let i = 0; i < numberOfHoles; i++ ) {
 			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length, 10 ) ];
 
-			nearVeticesIndexes = Globe.findIndexesOfNearVertices( globeVertices, randomVertexPoint );
+			nearVeticesIndexes = Utils.findIndexesOfNearVertices( globeVertices, randomVertexPoint );
 			for ( let k = 0; k < nearVeticesIndexes.length; k++ ) {
 				verticeIndex = nearVeticesIndexes[ k ];
-				globeVertices[ verticeIndex ] = Globe.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
+				globeVertices[ verticeIndex ] = Utils.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
 			}
 		}
 	}
@@ -137,22 +101,6 @@ export default class Globe {
 		}
 	}
 
-	static moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
-		return pointVector.lerp( originVector, alpha );
-	}
-
-	static findIndexesOfNearVertices ( vertices = [], pointVector, distThreshold = 10 ) {
-		let foundVertices = [];
-
-		for ( let i = 0; i < vertices.length; i++ ) {
-			if ( pointVector.distanceTo( vertices[ i ] ) < distThreshold ) {
-				foundVertices.push( i );
-			}
-		}
-
-		return foundVertices;
-	}
-
 	render () {
 		this.globeGroup.rotation.x += 0.001;
 		this.globeGroup.rotation.y += 0.001;
@@ -162,7 +110,5 @@ export default class Globe {
 		for ( let i = 0; i < this.mixers.length; i ++ ) {
 			this.mixers[ i ].update( delta );
 		}
-
-		this.floraAndFauna.render();
 	}
 }
