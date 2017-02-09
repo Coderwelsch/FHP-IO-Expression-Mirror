@@ -53,7 +53,7 @@ export default class Globe {
 	}
 
 	createWaterSurface () {
-		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 2.1, this.globePolygons, this.globePolygons );
+		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 2.05, this.globePolygons, this.globePolygons );
 
 		this.waterSurfaceMaterial = new THREE.MeshStandardMaterial( {
 			color: 0x68c3c0,
@@ -63,6 +63,7 @@ export default class Globe {
 		} );
 
 		this.waterSurfaceMesh = new THREE.Mesh( this.waterSurfaceGeometry, this.waterSurfaceMaterial );
+		this.waterSurfaceMesh.scale.set( 0.9, 0.9, 0.9 );
 		this.waterSurfaceMesh.name = "Globe Water Surface";
 		this.globeGroup.add( this.waterSurfaceMesh );
 	}

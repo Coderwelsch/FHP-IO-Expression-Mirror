@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -327,10 +327,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controller_GlobeMoodController_js__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Controls_js__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__models_Models_js__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controller_GlobeMoodController_js__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Controls_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__models_Models_js__ = __webpack_require__(7);
 /* global THREE */
 
 // imports
@@ -21489,534 +21489,6 @@ module.exports = {
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
-/* globals THREE */
-const RootAssetsPath = "./files/textures/models/";
-
-
-let objectLoader = new THREE.ObjectLoader(),
-	jsonLoader = new THREE.JSONLoader(),
-	models = {
-		vegetation: {
-			trees: {
-				Tree1: __webpack_require__( 3 ),
-				TreeDead: __webpack_require__( 4 )
-			}
-		},
-		birds: {
-			Flamingo: __webpack_require__( 2 )
-		}
-	};
-
-class Models {
-	constructor () {
-		this.models = models;
-	}
-
-	getModelJson ( model ) {
-		return jsonLoader.parse( model );
-	}
-
-	getModelObject ( model ) {
-		return objectLoader.parse( model );
-	}
-}
-/* harmony export (immutable) */ exports["a"] = Models;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-class Controls {
-	constructor ( camera ) {
-		this.camera = camera;
-		this.controls = new THREE.OrbitControls( this.camera );
-	}
-}
-/* harmony export (immutable) */ exports["a"] = Controls;
-
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__ = __webpack_require__(0);
-/* global THREE */
-
-// imports
-
-
-
-
-class FloraAndFauna {
-	constructor ( globeReference ) {
-		this.globe = globeReference;
-		this.globeGroup = this.globe.globeGroup;
-		this.globeRadius = this.globe.globeRadius;
-		this.mixers = this.globe.mixers;
-		this.models = this.globe.models;
-		this.textures = this.globe.textures;
-
-		this.groupFlamingos = null;
-		this.animation = new __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__["a" /* default */]();
-	}
-
-	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
-		let clonedGlobeMesh = this.globe.globeMesh.clone(),
-			texturePath = textureObj.texture || textureObj,
-			newTexture,
-			bumpMap,
-			newMaterial;
-
-		// set original globe to the new texture and hide it
-		newTexture = new THREE.TextureLoader().load( texturePath );
-
-		if ( repeation > 1 ) {
-			newTexture.wrapS = THREE.RepeatWrapping;
-			newTexture.wrapT = THREE.RepeatWrapping;
-			newTexture.repeat.set( repeation, repeation );
-		}
-
-		if ( useBumpMap ) {
-			bumpMap = new THREE.TextureLoader().load( this.textures.desertBump );
-			bumpMap.wrapS = THREE.RepeatWrapping;
-			bumpMap.wrapT = THREE.RepeatWrapping;
-			bumpMap.repeat.set( repeation, repeation );
-		}
-
-		newMaterial = new THREE.MeshStandardMaterial( {
-			bumpMap: bumpMap,
-			bumpScale: bumpMap ? bumpScale : undefined,
-			map: newTexture,
-			opacity: 0,
-			transparent: true,
-			color: 0xf5cda2,
-			roughness: 0.5,
-			metalness: 0.1
-		} );
-
-		this.globe.globeMesh.material = newMaterial;
-		this.globe.globeMesh.geometry.uvsNeedUpdate = true;
-		this.globe.globeMesh.needUpdate = true;
-
-		// add cloned globe and fade it out
-		this.globeGroup.add( clonedGlobeMesh );
-		this.animation.fadeOut( clonedGlobeMesh, () => {
-			this.globeGroup.remove( clonedGlobeMesh );
-		} );
-		this.animation.fadeIn( this.globe.globeMesh );
-	}
-
-	changeWaterLevel ( waterLevel ) {
-		Velocity( { opacity: 1 }, {
-			opacity: 0
-		}, {
-			duration: 3000,
-			progress: function(elements, complete, remaining, start, tweenValue) {
-				console.log((complete * 100) + "%");
-				console.log(remaining + "ms remaining!");
-				console.log("The current tween value is " + tweenValue)
-			}
-		});
-		/*this.animation.scale( waterLevel, this.globe.waterSurfaceMesh, () => {
-			console.log("DONE");
-		} );*/
-	}
-
-	createFauna () {
-		this.createBirds();
-	}
-
-	createFlora () {
-		this.createTrees();
-	}
-
-	createBirds () {
-		this.createFlamingos();
-	}
-
-	createFlamingos () {
-		let countFlamingos = 20;
-
-		this.groupFlamingos = new Array( countFlamingos );
-		for ( let i = 0; i < countFlamingos; i++ ) {
-			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
-				flamingoMinScaling = 0.03,
-				flamingoMaxScaling = 0.05,
-				flamingoScale = __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
-				flightHeightMinOffset = 0.15,
-				flightHeightMaxOffset = 0.25,
-				flamingoMaterial,
-				flamingoMesh,
-				mixer,
-				originGroup = new THREE.Object3D();
-
-			flamingoMaterial = new THREE.MeshPhongMaterial( {
-				color: 0xffffff,
-				specular: 0xffffff,
-				shininess: 20,
-				morphTargets: true,
-				vertexColors: THREE.FaceColors,
-				shading: THREE.FlatShading
-			} );
-
-			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
-			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
-			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
-			flamingoMesh.castShadow = true;
-			flamingoMesh.name = `Flamingo [${ i }]`;
-
-			originGroup.rotation.x = Math.PI * Math.random();
-			originGroup.rotation.y = Math.PI * Math.random();
-			originGroup.rotation.z = Math.PI * Math.random();
-			originGroup.name = `Origin Group Flamingo [${ i }]`;
-			originGroup.add( flamingoMesh );
-
-			this.groupFlamingos[ i ] = originGroup;
-			this.globeGroup.add( originGroup );
-
-			mixer = new THREE.AnimationMixer( flamingoMesh );
-			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1  ).play();
-			this.mixers.push( mixer );
-		}
-	}
-
-	createTrees () {
-		let treeMesh = this.models.getModelObject( this.models.models.vegetation.trees.TreeDead ),
-			treeMaterial,
-			deadTreeTexture,
-			deadTreeBump;
-
-		deadTreeTexture = new THREE.TextureLoader().load( this.textures.bark );
-		deadTreeBump = new THREE.TextureLoader().load( this.textures.barkBump );
-
-		treeMaterial = new THREE.MeshPhongMaterial( {
-			specular: 0xFFFFFF,
-			bumpMap: deadTreeBump,
-			bumpScale: 0.01,
-			map: deadTreeTexture,
-			shininess: 0,
-			metalness: 0,
-			shading: THREE.FlatShading
-		} );
-
-		__WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
-		treeMesh.position.y = this.globeRadius;
-		this.globeGroup.add( treeMesh );
-	}
-
-	renderFlamingos () {
-		if ( this.groupFlamingos ) {
-			let bird,
-				oldPosition,
-				newPosition,
-				finalPosition;
-
-			for ( let group of this.groupFlamingos ) {
-				bird = group.children[ 0 ];
-
-				oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
-
-				group.rotation.x += 0.005;
-				group.rotation.y += 0.005;
-				group.rotation.z += 0.005;
-				group.updateMatrixWorld();
-
-				newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
-				finalPosition = group.worldToLocal( newPosition );
-
-				bird.lookAt( finalPosition );
-			}
-		}
-	}
-
-	render () {
-		this.animation.render();
-		// this.renderFlamingos();
-	}
-}
-/* harmony export (immutable) */ exports["a"] = FloraAndFauna;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(0);
-/* global THREE */
-
-// imports
-
-
-
-class Globe {
-	constructor ( scene, models, globeRadius = 50 ) {
-		this.globeGroup = new THREE.Object3D();
-		this.globeGroup.name = "Globe Group";
-
-		this.globeRadius = globeRadius;
-		this.globePolygons = 64;
-		this.globePolygonTransformMultiplier = 1.5;
-
-		this.clock = new THREE.Clock();
-		this.scene = scene;
-		this.mixers = [];
-		this.models = models;
-
-		this.init();
-	}
-
-	init () {
-		this.createGlobe();
-		this.createWaterSurface();
-	}
-
-	createGlobe () {
-		this.globeGeometry = new THREE.SphereGeometry( this.globeRadius, this.globePolygons, this.globePolygons );
-		this.globeGeometry.mergeVertices();
-
-		// initial globe material
-		this.globeMaterial = new THREE.MeshStandardMaterial( {
-			color: 0xf5cda2,
-			transparent: true,
-			roughness: 0.5,
-			metalness: 0.1
-		} );
-
-		// final mesh
-		this.globeMesh = new THREE.Mesh( this.globeGeometry, this.globeMaterial );
-		this.globeMesh.name = "Globe";
-		this.globeMesh.receiveShadow = true;
-
-		this.globeGroup.add( this.globeMesh );
-
-		// add globe group to scene
-		this.scene.add( this.globeGroup );
-
-		// transform globe
-		this.transformGlobe();
-	}
-
-	createWaterSurface () {
-		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 2.1, this.globePolygons, this.globePolygons );
-
-		this.waterSurfaceMaterial = new THREE.MeshStandardMaterial( {
-			color: 0x68c3c0,
-			transparent: true,
-			roughness: 0.3,
-			opacity: 0.8
-		} );
-
-		this.waterSurfaceMesh = new THREE.Mesh( this.waterSurfaceGeometry, this.waterSurfaceMaterial );
-		this.waterSurfaceMesh.name = "Globe Water Surface";
-		this.globeGroup.add( this.waterSurfaceMesh );
-	}
-
-	transformGlobe () {
-		this.destroySurface();
-		this.addHoles();
-
-		this.globeMesh.geometry.verticesNeedUpdate = true;
-	}
-
-	addHoles () {
-		let globeVertices = this.globeMesh.geometry.vertices,
-			nearVeticesIndexes,
-			verticeIndex = 0,
-			numberOfHoles = Math.round( __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 3, 6 ) );
-
-		for ( let i = 0; i < numberOfHoles; i++ ) {
-			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length, 10 ) ];
-
-			nearVeticesIndexes = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].findIndexesOfNearVertices( globeVertices, randomVertexPoint );
-			for ( let k = 0; k < nearVeticesIndexes.length; k++ ) {
-				verticeIndex = nearVeticesIndexes[ k ];
-				globeVertices[ verticeIndex ] = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
-			}
-		}
-	}
-
-	destroySurface () {
-		let globeVertices = this.globeMesh.geometry.vertices;
-
-		for ( let i = 0; i < globeVertices.length; i++ ) {
-			globeVertices[ i ].x += Math.random() * this.globePolygonTransformMultiplier;
-			globeVertices[ i ].y += Math.random() * this.globePolygonTransformMultiplier;
-			globeVertices[ i ].z += Math.random() * this.globePolygonTransformMultiplier;
-		}
-	}
-
-	render () {
-		this.globeGroup.rotation.x += 0.001;
-		this.globeGroup.rotation.y += 0.001;
-		this.globeGroup.rotation.z += 0.001;
-
-		let delta = this.clock.getDelta();
-		for ( let i = 0; i < this.mixers.length; i ++ ) {
-			this.mixers[ i ].update( delta );
-		}
-	}
-}
-/* harmony export (immutable) */ exports["a"] = Globe;
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(1);
-// imports
-
-
-
-// prevent annoying warnings of THREE.js
-window.console.warn = () => { /* shut up man */ };
-
-// and god said, let there be light and there was light
-let world = new __WEBPACK_IMPORTED_MODULE_0__world_World_js__["a" /* default */]();
-
-// debug
-window.scene = world.scene;
-
-// test
-window.setInterval( () => {
-	world.globeMoodController.setMoodValue( world.globeMoodController.getMoodValue() + 0.1 );
-}, 4000 );
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__ = __webpack_require__(11);
-// imports
-
-
-
-
-const MoodStates = [
-	{
-		name: "Desert",
-		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
-		enter: function ( controller ) {
-			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.desert, false );
-			controller.floraAndFauna.changeWaterLevel( 0.98 );
-		},
-		leave: function ( controller ) {
-
-		}
-	}, {
-		name: "Fertile",
-		test: ( moodValue ) => { return ( moodValue > 0.1 && moodValue <= 0.2 ); },
-		enter: function ( controller ) {
-			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.fertile, false );
-			controller.floraAndFauna.changeWaterLevel( 1 );
-		},
-		leave: function ( controller ) {
-
-		}
-	}
-];
-
-class GlobeMoodController {
-	constructor ( globeReference, initalMoodValue ) {
-		this.globe = globeReference;
-		this.mood = initalMoodValue;
-		this.currentState = null;
-
-		this.floraAndFauna = new __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__["a" /* default */]( this.globe );
-
-		this.setMoodValue();
-	}
-
-	setMoodValue ( moodValue = this.mood ) {
-		this.mood = moodValue;
-		this.updateGlobeStateToMood();
-	}
-
-	getMoodValue () {
-		return this.mood;
-	}
-
-	getMoodState () {
-		return ( this.currentState !== null ? this.currentState : undefined );
-	}
-
-	getAllMoodStates () {
-		return MoodStates;
-	}
-
-	updateGlobeStateToMood () {
-		let oldMoodValue = this.currentState;
-
-		for ( let state of MoodStates ) {
-			if ( state.test( this.mood ) && state !== oldMoodValue ) {
-				if ( this.currentState !== null && typeof this.currentState.leave === "function" ) {
-					this.currentState.leave( this.globe, this.mood );
-				}
-
-				state.enter( this );
-				this.currentState = state;
-
-				break;
-			}
-		}
-
-		if ( this.currentState === null ) {
-			window.console.log( "No globe state found for mood value %s", this.mood );
-		} else if ( oldMoodValue !== null && this.currentState !== oldMoodValue ) {
-			window.console.log( "Changed globe mood state from '%s' to '%s'", oldMoodValue.name, this.currentState.name );
-		} else if ( this.currentState === oldMoodValue ) {
-			window.console.log( "Globe mood state already set to '%s'", this.currentState.name );
-		} else {
-			window.console.log( "Set initial globe mood state to '%s'", this.currentState.name );
-		}
-	}
-
-	render () {
-		this.floraAndFauna.render();
-	}
-}
-/* harmony export (immutable) */ exports["a"] = GlobeMoodController;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ exports["a"] = {
-	globe: {
-		fertile: "./files/textures/ground-texture.jpg",
-
-		desert: {
-			texture: "./files/textures/desert-texture.jpg",
-			bump: "./files/textures/desert-texture-bump.jpg"
-		},
-
-		sand: "./files/textures/sand-texture.jpg"
-	},
-	tree: {
-		bark: {
-			texture: "./files/textures/bark-texture.jpg",
-			bump: "./files/textures/bark-texture-bump.jpg"
-		}
-	}
-};
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
 class Animation {
 	constructor () {
 		this.animations = [];
@@ -22104,6 +21576,595 @@ class Animation {
 }
 /* harmony export (immutable) */ exports["a"] = Animation;
 
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__ = __webpack_require__(8);
+// imports
+
+
+
+
+const MoodStates = [
+	{
+		name: "Desert",
+		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 0 );
+			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.desert, false );
+			controller.floraAndFauna.changeWaterLevel( 0.975 );
+			//controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], Textures.globe );
+		},
+		leave: function ( controller ) {
+
+		}
+	}, {
+		name: "Fertile",
+		test: ( moodValue ) => { return ( moodValue > 0.1 && moodValue <= 0.2 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.fertile, false );
+			controller.floraAndFauna.changeWaterLevel( 1 );
+			controller.floraAndFauna.createFlamingos( 10 );
+		},
+		leave: function ( controller ) {
+
+		}
+	}, {
+		name: "Paradise",
+		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 20 );
+		},
+		leave: function ( controller ) {
+
+		}
+	}, {
+		name: "Utopia",
+		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 0 );
+		},
+		leave: function ( controller ) {
+
+		}
+	}
+];
+
+class GlobeMoodController {
+	constructor ( globeReference, initalMoodValue ) {
+		this.globe = globeReference;
+		this.mood = initalMoodValue;
+		this.currentState = null;
+
+		this.floraAndFauna = new __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__["a" /* default */]( this.globe );
+
+		this.setMoodValue();
+	}
+
+	setMoodValue ( moodValue = this.mood ) {
+		moodValue = Number( moodValue.toFixed( 1 ) );
+
+		if ( !moodValue || Number.isNaN( moodValue ) ) {
+			return;
+		}
+
+		this.mood = moodValue;
+		this.updateGlobeStateToMood();
+	}
+
+	getMoodValue () {
+		return this.mood;
+	}
+
+	getMoodState () {
+		return ( this.currentState !== null ? this.currentState : undefined );
+	}
+
+	getAllMoodStates () {
+		return MoodStates;
+	}
+
+	updateGlobeStateToMood () {
+		let oldMoodValue = this.currentState;
+
+		for ( let state of MoodStates ) {
+			if ( state.test( this.mood ) && state !== oldMoodValue ) {
+				if ( this.currentState !== null && typeof this.currentState.leave === "function" ) {
+					this.currentState.leave( this.globe, this.mood );
+				}
+
+				state.enter( this );
+				this.currentState = state;
+
+				break;
+			}
+		}
+
+		if ( this.currentState === null ) {
+			window.console.log( "No globe state found for mood value %s", this.mood );
+		} else if ( oldMoodValue !== null && this.currentState !== oldMoodValue ) {
+			window.console.log( "Changed globe mood state from '%s' to '%s'", oldMoodValue.name, this.currentState.name );
+		} else if ( this.currentState === oldMoodValue ) {
+			window.console.log( "Globe mood state already set to '%s'", this.currentState.name );
+		} else {
+			window.console.log( "Set initial globe mood state to '%s'", this.currentState.name );
+		}
+	}
+
+	render () {
+		this.floraAndFauna.render();
+	}
+}
+/* harmony export (immutable) */ exports["a"] = GlobeMoodController;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* globals THREE */
+const RootAssetsPath = "./files/textures/models/";
+
+
+let objectLoader = new THREE.ObjectLoader(),
+	jsonLoader = new THREE.JSONLoader(),
+	models = {
+		vegetation: {
+			trees: {
+				Tree1: __webpack_require__( 3 ),
+				TreeDead: __webpack_require__( 4 )
+			}
+		},
+		birds: {
+			Flamingo: __webpack_require__( 2 )
+		}
+	};
+
+class Models {
+	constructor () {
+		this.models = models;
+	}
+
+	getModelJson ( model ) {
+		return jsonLoader.parse( model );
+	}
+
+	getModelObject ( model ) {
+		return objectLoader.parse( model );
+	}
+}
+/* harmony export (immutable) */ exports["a"] = Models;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ exports["a"] = {
+	globe: {
+		fertile: "./files/textures/ground-texture.jpg",
+
+		desert: {
+			texture: "./files/textures/desert-texture.jpg",
+			bump: "./files/textures/desert-texture-bump.jpg"
+		},
+
+		sand: "./files/textures/sand-texture.jpg"
+	},
+	tree: {
+		bark: {
+			texture: "./files/textures/bark-texture.jpg",
+			bump: "./files/textures/bark-texture-bump.jpg"
+		}
+	}
+};
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+class Controls {
+	constructor ( camera ) {
+		this.camera = camera;
+		this.controls = new THREE.OrbitControls( this.camera );
+	}
+}
+/* harmony export (immutable) */ exports["a"] = Controls;
+
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__ = __webpack_require__(0);
+/* global THREE, Velocity */
+
+// imports
+
+
+
+
+class FloraAndFauna {
+	constructor ( globeReference ) {
+		this.globe = globeReference;
+		this.globeGroup = this.globe.globeGroup;
+		this.globeRadius = this.globe.globeRadius;
+		this.mixers = this.globe.mixers;
+		this.models = this.globe.models;
+		this.textures = this.globe.textures;
+
+		this.groupFlamingos = null;
+		this.animation = new __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__["a" /* default */]();
+	}
+
+	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
+		// velocity tweening values
+		let newTextureOpacity = 0,
+			oldTextureOpacity = 1,
+			toFrom = [ oldTextureOpacity, newTextureOpacity ];
+
+		let clonedGlobeMesh = this.globe.globeMesh.clone(),
+			texturePath = textureObj.texture || textureObj,
+			newTexture,
+			bumpMap,
+			newMaterial;
+
+		// set original globe to the new texture and hide it
+		newTexture = new THREE.TextureLoader().load( texturePath );
+
+		if ( repeation > 1 ) {
+			newTexture.wrapS = THREE.RepeatWrapping;
+			newTexture.wrapT = THREE.RepeatWrapping;
+			newTexture.repeat.set( repeation, repeation );
+		}
+
+		if ( useBumpMap ) {
+			bumpMap = new THREE.TextureLoader().load( this.textures.desertBump );
+			bumpMap.wrapS = THREE.RepeatWrapping;
+			bumpMap.wrapT = THREE.RepeatWrapping;
+			bumpMap.repeat.set( repeation, repeation );
+		}
+
+		newMaterial = new THREE.MeshStandardMaterial( {
+			bumpMap: bumpMap,
+			bumpScale: bumpMap ? bumpScale : undefined,
+			map: newTexture,
+			opacity: 0,
+			transparent: true,
+			color: 0xf5cda2,
+			roughness: 0.5,
+			metalness: 0.1
+		} );
+
+		this.globe.globeMesh.material = newMaterial;
+		this.globe.globeMesh.geometry.uvsNeedUpdate = true;
+		this.globe.globeMesh.needUpdate = true;
+
+		// add cloned globe and fade it out
+		this.globeGroup.add( clonedGlobeMesh );
+
+		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+			clonedGlobeMesh.material.opacity = 1 - complete;
+			this.globe.globeMesh.material.opacity = complete;
+		} } ).then( () => {
+			this.globeGroup.remove( clonedGlobeMesh );
+		} );
+	}
+
+	changeWaterLevel ( waterLevel ) {
+		let currentScale = this.globe.waterSurfaceMesh.scale.x,
+			toFrom = [ waterLevel, currentScale ];
+
+		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+			this.globe.waterSurfaceMesh.scale.set( tweenValue, tweenValue, tweenValue );
+		} } );
+	}
+
+	createFauna () {
+		this.createBirds();
+	}
+
+	createFlora () {
+		this.createTrees();
+	}
+
+	createBirds () {
+		this.createFlamingos();
+	}
+
+	createFlamingos ( countFlamingos ) {
+		let addFlamingo = () => {
+			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
+				flamingoMinScaling = 0.01,
+				flamingoMaxScaling = 0.05,
+				flamingoScale = __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
+				flightHeightMinOffset = 0.15,
+				flightHeightMaxOffset = 0.25,
+				flamingoMaterial,
+				flamingoMesh,
+				mixer,
+				originGroup = new THREE.Object3D();
+
+			flamingoMaterial = new THREE.MeshPhongMaterial( {
+				color: 0xffffff,
+				specular: 0xffffff,
+				shininess: 20,
+				opacity: 0,
+				transparent: true,
+				morphTargets: true,
+				vertexColors: THREE.FaceColors,
+				shading: THREE.FlatShading
+			} );
+
+			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
+			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
+			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
+			flamingoMesh.castShadow = true;
+			flamingoMesh.name = `Flamingo [${ this.groupFlamingos.length }]`;
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+			originGroup.name = `Origin Group Flamingo [${ this.groupFlamingos.length }]`;
+			originGroup.add( flamingoMesh );
+
+			this.groupFlamingos.push( originGroup );
+			this.globeGroup.add( originGroup );
+
+			mixer = new THREE.AnimationMixer( flamingoMesh );
+			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1 ).play();
+			this.mixers.push( mixer );
+
+			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+				flamingoMesh.needUpdate = true;
+				flamingoMesh.material.opacity = complete;
+			} } );
+		};
+
+		if ( this.groupFlamingos ) {
+			if ( this.groupFlamingos.length > countFlamingos ) {
+				// remove flamingos
+				for ( let i = this.groupFlamingos.length - 1; i > countFlamingos - 1; i-- ) {
+					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+						this.groupFlamingos[ i ].children[ 0 ].needUpdate = true;
+						this.groupFlamingos[ i ].children[ 0 ].material.opacity = 1 - complete;
+					} } ).then( () => {
+						this.globeGroup.remove( this.groupFlamingos[ i ] );
+						this.mixers.splice( i, 1 );
+						this.groupFlamingos.splice( i, 1 );
+					} );
+				}
+			} else if ( this.groupFlamingos.length < countFlamingos ) {
+				// add flamingos
+				for ( let i = this.groupFlamingos.length - 1; i < countFlamingos - 1; i++ ) {
+					addFlamingo();
+				}
+			}
+		} else {
+			this.groupFlamingos = [];
+
+			for ( let i = 0; i < countFlamingos - 1; i++ ) {
+				addFlamingo();
+			}
+		}
+	}
+
+	createTrees () {
+		let treeMesh = this.models.getModelObject( this.models.models.vegetation.trees.TreeDead ),
+			treeMaterial,
+			deadTreeTexture,
+			deadTreeBump;
+
+		deadTreeTexture = new THREE.TextureLoader().load( this.textures.bark );
+		deadTreeBump = new THREE.TextureLoader().load( this.textures.barkBump );
+
+		treeMaterial = new THREE.MeshPhongMaterial( {
+			specular: 0xFFFFFF,
+			bumpMap: deadTreeBump,
+			bumpScale: 0.01,
+			map: deadTreeTexture,
+			shininess: 0,
+			metalness: 0,
+			shading: THREE.FlatShading
+		} );
+
+		__WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
+		treeMesh.position.y = this.globeRadius;
+		this.globeGroup.add( treeMesh );
+	}
+
+	renderFlamingos () {
+		if ( this.groupFlamingos ) {
+			let bird,
+				oldPosition,
+				newPosition,
+				finalPosition;
+
+			for ( let group of this.groupFlamingos ) {
+				bird = group.children[ 0 ];
+
+				oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
+
+				group.rotation.x += 0.005;
+				group.rotation.y += 0.005;
+				group.rotation.z += 0.005;
+				group.updateMatrixWorld();
+
+				newPosition = oldPosition.applyAxisAngle( group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) ), 0 );
+				finalPosition = group.worldToLocal( newPosition );
+
+				bird.lookAt( finalPosition );
+			}
+		}
+	}
+
+	render () {
+		this.animation.render();
+		this.renderFlamingos();
+	}
+}
+/* harmony export (immutable) */ exports["a"] = FloraAndFauna;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(0);
+/* global THREE */
+
+// imports
+
+
+
+class Globe {
+	constructor ( scene, models, globeRadius = 50 ) {
+		this.globeGroup = new THREE.Object3D();
+		this.globeGroup.name = "Globe Group";
+
+		this.globeRadius = globeRadius;
+		this.globePolygons = 64;
+		this.globePolygonTransformMultiplier = 1.5;
+
+		this.clock = new THREE.Clock();
+		this.scene = scene;
+		this.mixers = [];
+		this.models = models;
+
+		this.init();
+	}
+
+	init () {
+		this.createGlobe();
+		this.createWaterSurface();
+	}
+
+	createGlobe () {
+		this.globeGeometry = new THREE.SphereGeometry( this.globeRadius, this.globePolygons, this.globePolygons );
+		this.globeGeometry.mergeVertices();
+
+		// initial globe material
+		this.globeMaterial = new THREE.MeshStandardMaterial( {
+			color: 0xf5cda2,
+			transparent: true,
+			roughness: 0.5,
+			metalness: 0.1
+		} );
+
+		// final mesh
+		this.globeMesh = new THREE.Mesh( this.globeGeometry, this.globeMaterial );
+		this.globeMesh.name = "Globe";
+		this.globeMesh.receiveShadow = true;
+
+		this.globeGroup.add( this.globeMesh );
+
+		// add globe group to scene
+		this.scene.add( this.globeGroup );
+
+		// transform globe
+		this.transformGlobe();
+	}
+
+	createWaterSurface () {
+		this.waterSurfaceGeometry = new THREE.SphereGeometry( this.globeRadius - 2.05, this.globePolygons, this.globePolygons );
+
+		this.waterSurfaceMaterial = new THREE.MeshStandardMaterial( {
+			color: 0x68c3c0,
+			transparent: true,
+			roughness: 0.3,
+			opacity: 0.8
+		} );
+
+		this.waterSurfaceMesh = new THREE.Mesh( this.waterSurfaceGeometry, this.waterSurfaceMaterial );
+		this.waterSurfaceMesh.scale.set( 0.9, 0.9, 0.9 );
+		this.waterSurfaceMesh.name = "Globe Water Surface";
+		this.globeGroup.add( this.waterSurfaceMesh );
+	}
+
+	transformGlobe () {
+		this.destroySurface();
+		this.addHoles();
+
+		this.globeMesh.geometry.verticesNeedUpdate = true;
+	}
+
+	addHoles () {
+		let globeVertices = this.globeMesh.geometry.vertices,
+			nearVeticesIndexes,
+			verticeIndex = 0,
+			numberOfHoles = Math.round( __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 3, 6 ) );
+
+		for ( let i = 0; i < numberOfHoles; i++ ) {
+			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length, 10 ) ];
+
+			nearVeticesIndexes = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].findIndexesOfNearVertices( globeVertices, randomVertexPoint );
+			for ( let k = 0; k < nearVeticesIndexes.length; k++ ) {
+				verticeIndex = nearVeticesIndexes[ k ];
+				globeVertices[ verticeIndex ] = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
+			}
+		}
+	}
+
+	destroySurface () {
+		let globeVertices = this.globeMesh.geometry.vertices;
+
+		for ( let i = 0; i < globeVertices.length; i++ ) {
+			globeVertices[ i ].x += Math.random() * this.globePolygonTransformMultiplier;
+			globeVertices[ i ].y += Math.random() * this.globePolygonTransformMultiplier;
+			globeVertices[ i ].z += Math.random() * this.globePolygonTransformMultiplier;
+		}
+	}
+
+	render () {
+		this.globeGroup.rotation.x += 0.001;
+		this.globeGroup.rotation.y += 0.001;
+		this.globeGroup.rotation.z += 0.001;
+
+		let delta = this.clock.getDelta();
+		for ( let i = 0; i < this.mixers.length; i ++ ) {
+			this.mixers[ i ].update( delta );
+		}
+	}
+}
+/* harmony export (immutable) */ exports["a"] = Globe;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(1);
+// imports
+
+
+
+// prevent annoying warnings of THREE.js
+window.console.warn = () => { /* shut up man */ };
+
+// and god said, let there be light and there was light
+let world = new __WEBPACK_IMPORTED_MODULE_0__world_World_js__["a" /* default */]();
+
+// debug
+window.scene = world.scene;
+
+// test
+window.setInterval( () => {
+	let value = world.globeMoodController.getMoodValue() + 0.1;
+	world.globeMoodController.setMoodValue( value );
+}, 8000 );
 
 /***/ }
 /******/ ]);

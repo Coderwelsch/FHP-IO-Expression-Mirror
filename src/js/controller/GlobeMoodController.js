@@ -8,8 +8,10 @@ const MoodStates = [
 		name: "Desert",
 		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
 		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 0 );
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.desert, false );
-			controller.floraAndFauna.changeWaterLevel( 0.98 );
+			controller.floraAndFauna.changeWaterLevel( 0.975 );
+			//controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], Textures.globe );
 		},
 		leave: function ( controller ) {
 
@@ -20,6 +22,25 @@ const MoodStates = [
 		enter: function ( controller ) {
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
+			controller.floraAndFauna.createFlamingos( 10 );
+		},
+		leave: function ( controller ) {
+
+		}
+	}, {
+		name: "Paradise",
+		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 20 );
+		},
+		leave: function ( controller ) {
+
+		}
+	}, {
+		name: "Utopia",
+		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
+		enter: function ( controller ) {
+			controller.floraAndFauna.createFlamingos( 0 );
 		},
 		leave: function ( controller ) {
 
@@ -39,6 +60,12 @@ export default class GlobeMoodController {
 	}
 
 	setMoodValue ( moodValue = this.mood ) {
+		moodValue = Number( moodValue.toFixed( 1 ) );
+
+		if ( !moodValue || Number.isNaN( moodValue ) ) {
+			return;
+		}
+
 		this.mood = moodValue;
 		this.updateGlobeStateToMood();
 	}

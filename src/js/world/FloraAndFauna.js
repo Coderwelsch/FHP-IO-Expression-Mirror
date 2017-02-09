@@ -1,4 +1,4 @@
-/* global THREE */
+/* global THREE, Velocity */
 
 // imports
 import Animation from "../animation/Animation.js";
@@ -19,6 +19,11 @@ export default class FloraAndFauna {
 	}
 
 	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
+		// velocity tweening values
+		let newTextureOpacity = 0,
+			oldTextureOpacity = 1,
+			toFrom = [ oldTextureOpacity, newTextureOpacity ];
+
 		let clonedGlobeMesh = this.globe.globeMesh.clone(),
 			texturePath = textureObj.texture || textureObj,
 			newTexture,
@@ -58,26 +63,22 @@ export default class FloraAndFauna {
 
 		// add cloned globe and fade it out
 		this.globeGroup.add( clonedGlobeMesh );
-		this.animation.fadeOut( clonedGlobeMesh, () => {
+
+		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+			clonedGlobeMesh.material.opacity = 1 - complete;
+			this.globe.globeMesh.material.opacity = complete;
+		} } ).then( () => {
 			this.globeGroup.remove( clonedGlobeMesh );
 		} );
-		this.animation.fadeIn( this.globe.globeMesh );
 	}
 
 	changeWaterLevel ( waterLevel ) {
-		Velocity( { opacity: 1 }, {
-			opacity: 0
-		}, {
-			duration: 3000,
-			progress: function(elements, complete, remaining, start, tweenValue) {
-				console.log((complete * 100) + "%");
-				console.log(remaining + "ms remaining!");
-				console.log("The current tween value is " + tweenValue)
-			}
-		});
-		/*this.animation.scale( waterLevel, this.globe.waterSurfaceMesh, () => {
-			console.log("DONE");
-		} );*/
+		let currentScale = this.globe.waterSurfaceMesh.scale.x,
+			toFrom = [ waterLevel, currentScale ];
+
+		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+			this.globe.waterSurfaceMesh.scale.set( tweenValue, tweenValue, tweenValue );
+		} } );
 	}
 
 	createFauna () {
@@ -92,13 +93,10 @@ export default class FloraAndFauna {
 		this.createFlamingos();
 	}
 
-	createFlamingos () {
-		let countFlamingos = 20;
-
-		this.groupFlamingos = new Array( countFlamingos );
-		for ( let i = 0; i < countFlamingos; i++ ) {
+	createFlamingos ( countFlamingos ) {
+		let addFlamingo = () => {
 			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
-				flamingoMinScaling = 0.03,
+				flamingoMinScaling = 0.01,
 				flamingoMaxScaling = 0.05,
 				flamingoScale = Utils.randomRange( flamingoMinScaling, flamingoMaxScaling ),
 				flightHeightMinOffset = 0.15,
@@ -112,6 +110,8 @@ export default class FloraAndFauna {
 				color: 0xffffff,
 				specular: 0xffffff,
 				shininess: 20,
+				opacity: 0,
+				transparent: true,
 				morphTargets: true,
 				vertexColors: THREE.FaceColors,
 				shading: THREE.FlatShading
@@ -121,20 +121,52 @@ export default class FloraAndFauna {
 			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
 			flamingoMesh.position.y = this.globeRadius * ( 1 + Utils.randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
 			flamingoMesh.castShadow = true;
-			flamingoMesh.name = `Flamingo [${ i }]`;
+			flamingoMesh.name = `Flamingo [${ this.groupFlamingos.length }]`;
 
 			originGroup.rotation.x = Math.PI * Math.random();
 			originGroup.rotation.y = Math.PI * Math.random();
 			originGroup.rotation.z = Math.PI * Math.random();
-			originGroup.name = `Origin Group Flamingo [${ i }]`;
+			originGroup.name = `Origin Group Flamingo [${ this.groupFlamingos.length }]`;
 			originGroup.add( flamingoMesh );
 
-			this.groupFlamingos[ i ] = originGroup;
+			this.groupFlamingos.push( originGroup );
 			this.globeGroup.add( originGroup );
 
 			mixer = new THREE.AnimationMixer( flamingoMesh );
-			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1  ).play();
+			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1 ).play();
 			this.mixers.push( mixer );
+
+			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+				flamingoMesh.needUpdate = true;
+				flamingoMesh.material.opacity = complete;
+			} } );
+		};
+
+		if ( this.groupFlamingos ) {
+			if ( this.groupFlamingos.length > countFlamingos ) {
+				// remove flamingos
+				for ( let i = this.groupFlamingos.length - 1; i > countFlamingos - 1; i-- ) {
+					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+						this.groupFlamingos[ i ].children[ 0 ].needUpdate = true;
+						this.groupFlamingos[ i ].children[ 0 ].material.opacity = 1 - complete;
+					} } ).then( () => {
+						this.globeGroup.remove( this.groupFlamingos[ i ] );
+						this.mixers.splice( i, 1 );
+						this.groupFlamingos.splice( i, 1 );
+					} );
+				}
+			} else if ( this.groupFlamingos.length < countFlamingos ) {
+				// add flamingos
+				for ( let i = this.groupFlamingos.length - 1; i < countFlamingos - 1; i++ ) {
+					addFlamingo();
+				}
+			}
+		} else {
+			this.groupFlamingos = [];
+
+			for ( let i = 0; i < countFlamingos - 1; i++ ) {
+				addFlamingo();
+			}
 		}
 	}
 
@@ -189,6 +221,6 @@ export default class FloraAndFauna {
 
 	render () {
 		this.animation.render();
-		// this.renderFlamingos();
+		this.renderFlamingos();
 	}
 }

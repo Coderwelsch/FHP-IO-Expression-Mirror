@@ -13,5 +13,6 @@ window.scene = world.scene;
 
 // test
 window.setInterval( () => {
-	world.globeMoodController.setMoodValue( world.globeMoodController.getMoodValue() + 0.1 );
-}, 4000 );
+	let value = world.globeMoodController.getMoodValue() + 0.1;
+	world.globeMoodController.setMoodValue( value );
+}, 8000 );
