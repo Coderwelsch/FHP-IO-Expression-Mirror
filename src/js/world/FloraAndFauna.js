@@ -3,6 +3,7 @@
 // imports
 import Animation from "../animation/Animation.js";
 import Utils from "../utils/Utils.js";
+import Textures from "../textures/Textures.js";
 
 
 export default class FloraAndFauna {
@@ -12,9 +13,10 @@ export default class FloraAndFauna {
 		this.globeRadius = this.globe.globeRadius;
 		this.mixers = this.globe.mixers;
 		this.models = this.globe.models;
-		this.textures = this.globe.textures;
+		this.textures = Textures;
 
 		this.groupFlamingos = null;
+		this.groupTrees = null;
 		this.animation = new Animation();
 	}
 
@@ -81,16 +83,64 @@ export default class FloraAndFauna {
 		} } );
 	}
 
-	createFauna () {
-		this.createBirds();
-	}
+	changeTreeVegetation ( range = [ 10, 15 ], treeModelsType = "deadTrees" ) {
+		let newNumberOfTrees = Math.round( Utils.randomRange( range[ 0 ], range[ 1 ] ) ),
+			models = this.models.models.vegetation.trees[ treeModelsType ],
+			modelKeys = Object.keys( models );
 
-	createFlora () {
-		this.createTrees();
-	}
+		let addTree = ( treeMesh ) => {
+			let treeMaterial,
+				deadTreeTexture,
+				deadTreeBump,
+				treeScale = Utils.randomRange( 0.5, 1.5 ),
+				originGroup = new THREE.Object3D();
 
-	createBirds () {
-		this.createFlamingos();
+			deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture );
+			deadTreeBump = new THREE.TextureLoader().load( this.textures.tree.bark.bump );
+
+			treeMaterial = new THREE.MeshPhongMaterial( {
+				specular: 0xFFFFFF,
+				bumpMap: deadTreeBump,
+				bumpScale: 0.01,
+				map: deadTreeTexture,
+				shininess: 0,
+				metalness: 0,
+				shading: THREE.FlatShading
+			} );
+
+			treeMesh.scale.set( treeScale, treeScale, treeScale );
+			treeMesh.castShadow = true;
+			treeMesh.name = `Dead Tree [${ this.groupTrees.length }]`;
+
+			originGroup.add( treeMesh );
+
+			Utils.setDeepMaterial( treeMesh, treeMaterial );
+
+			treeMesh.position.y = this.globeRadius - 0.01;
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+			this.globeGroup.add( originGroup );
+
+			return originGroup;
+		};
+
+		if ( this.groupTrees !== null ) {
+
+		} else {
+			this.groupTrees = [];
+
+			let randomModelKey,
+				parsedModel;
+
+			for ( let i = 0; i < newNumberOfTrees; i++ ) {
+				randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
+				parsedModel = this.models.getModelObject( models[ randomModelKey ] );
+
+				this.groupTrees.push( addTree( parsedModel ) );
+			}
+		}
 	}
 
 	createFlamingos ( countFlamingos ) {
@@ -168,30 +218,6 @@ export default class FloraAndFauna {
 				addFlamingo();
 			}
 		}
-	}
-
-	createTrees () {
-		let treeMesh = this.models.getModelObject( this.models.models.vegetation.trees.TreeDead ),
-			treeMaterial,
-			deadTreeTexture,
-			deadTreeBump;
-
-		deadTreeTexture = new THREE.TextureLoader().load( this.textures.bark );
-		deadTreeBump = new THREE.TextureLoader().load( this.textures.barkBump );
-
-		treeMaterial = new THREE.MeshPhongMaterial( {
-			specular: 0xFFFFFF,
-			bumpMap: deadTreeBump,
-			bumpScale: 0.01,
-			map: deadTreeTexture,
-			shininess: 0,
-			metalness: 0,
-			shading: THREE.FlatShading
-		} );
-
-		Utils.setDeepMaterial( treeMesh, treeMaterial );
-		treeMesh.position.y = this.globeRadius;
-		this.globeGroup.add( treeMesh );
 	}
 
 	renderFlamingos () {

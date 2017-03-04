@@ -30,7 +30,7 @@ export default {
 	},
 
 	merge ( geometry1, geometry2, materialIndexOffset ) {
-		window.console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
+		window.console.warn( "THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead." );
 
 		var matrix;
 
@@ -120,8 +120,8 @@ export default {
 		}
 
 		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
+		function binarySearchIndices ( value ) {
+			function binarySearch ( start, end ) {
 				// return closest larger index
 				// if exact number is not found
 				if ( end < start )
@@ -189,8 +189,8 @@ export default {
 		}
 
 		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
+		function binarySearchIndices ( value ) {
+			function binarySearch ( start, end ) {
 				// return closest larger index
 				// if exact number is not found
 				if ( end < start )
@@ -244,7 +244,7 @@ export default {
 	}(),
 
 	center: function ( geometry ) {
-		console.warn( 'THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.' );
+		console.warn( "THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead." );
 		return geometry.center();
 	}
-}
+};

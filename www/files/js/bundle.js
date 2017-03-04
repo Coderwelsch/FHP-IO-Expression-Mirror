@@ -103,7 +103,7 @@
 	},
 
 	merge ( geometry1, geometry2, materialIndexOffset ) {
-		window.console.warn( 'THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.' );
+		window.console.warn( "THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead." );
 
 		var matrix;
 
@@ -193,8 +193,8 @@
 		}
 
 		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
+		function binarySearchIndices ( value ) {
+			function binarySearch ( start, end ) {
 				// return closest larger index
 				// if exact number is not found
 				if ( end < start )
@@ -262,8 +262,8 @@
 		}
 
 		// binary search cumulative areas array
-		function binarySearchIndices( value ) {
-			function binarySearch( start, end ) {
+		function binarySearchIndices ( value ) {
+			function binarySearch ( start, end ) {
 				// return closest larger index
 				// if exact number is not found
 				if ( end < start )
@@ -317,10 +317,11 @@
 	}(),
 
 	center: function ( geometry ) {
-		console.warn( 'THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.' );
+		console.warn( "THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead." );
 		return geometry.center();
 	}
 };
+
 
 /***/ },
 /* 1 */
@@ -19458,173 +19459,7 @@ module.exports = {
 };
 
 /***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-module.exports = {
-	"metadata": {
-		"version": 4.4,
-		"type": "Object",
-		"generator": "Object3D.toJSON"
-	},
-	"geometries": [
-		{
-			"uuid": "7040C488-5D8F-4415-B04D-ADDFCF603B1A",
-			"type": "CylinderBufferGeometry",
-			"radiusTop": 0.2,
-			"radiusBottom": 0.24,
-			"height": 2,
-			"radialSegments": 16,
-			"heightSegments": 1,
-			"openEnded": false
-		},
-		{
-			"uuid": "38360378-8040-4155-B66B-5A634DC36942",
-			"type": "SphereBufferGeometry",
-			"radius": 1,
-			"widthSegments": 10,
-			"heightSegments": 10,
-			"phiStart": 0,
-			"phiLength": 6.283185307179586,
-			"thetaStart": 0,
-			"thetaLength": 3.141592653589793
-		}
-	],
-	"materials": [
-		{
-			"uuid": "06A23C5D-28CC-43CD-BEAA-1DC99E53D0DA",
-			"type": "MeshStandardMaterial",
-			"color": 16766090,
-			"roughness": 0.2,
-			"metalness": 0,
-			"emissive": 0,
-			"shading": 1,
-			"depthFunc": 3,
-			"depthTest": true,
-			"depthWrite": true,
-			"skinning": false,
-			"morphTargets": false
-		},
-		{
-			"uuid": "BBE66265-584D-4E27-8514-765C6B232262",
-			"type": "MeshStandardMaterial",
-			"color": 7594310,
-			"roughness": 1,
-			"metalness": 1,
-			"emissive": 0,
-			"shading": 1,
-			"depthFunc": 3,
-			"depthTest": true,
-			"depthWrite": true,
-			"skinning": false,
-			"morphTargets": false
-		}
-	],
-	"object": {
-		"uuid": "008D4FDA-2BBB-45BB-B644-3CF1FA58B16A",
-		"type": "Scene",
-		"matrix": [
-			1,
-			0,
-			0,
-			0,
-			0,
-			1,
-			0,
-			0,
-			0,
-			0,
-			1,
-			0,
-			0,
-			0,
-			0,
-			1
-		],
-		"children": [
-			{
-				"uuid": "0F7EFAB9-0B79-40CA-840A-327EA778FDAC",
-				"type": "Group",
-				"name": "Tree",
-				"matrix": [
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
-					0,
-					0,
-					0,
-					0,
-					1,
-					0,
-					0,
-					0.9735186696052551,
-					0,
-					1
-				],
-				"children": [
-					{
-						"uuid": "081CD780-C13B-4146-9DA6-8955C6EF9CB6",
-						"type": "Mesh",
-						"name": "Stem",
-						"matrix": [
-							1,
-							0,
-							0,
-							0,
-							0,
-							1,
-							0,
-							0,
-							0,
-							0,
-							1,
-							0,
-							0,
-							0,
-							0,
-							1
-						],
-						"geometry": "7040C488-5D8F-4415-B04D-ADDFCF603B1A",
-						"material": "06A23C5D-28CC-43CD-BEAA-1DC99E53D0DA"
-					},
-					{
-						"uuid": "DABCB884-C909-4942-9B78-9AAF52343931",
-						"type": "Mesh",
-						"name": "Crown",
-						"castShadow": true,
-						"receiveShadow": true,
-						"matrix": [
-							1,
-							0,
-							0,
-							0,
-							0,
-							1,
-							0,
-							0,
-							0,
-							0,
-							1,
-							0,
-							0,
-							1.9489984512329102,
-							0,
-							1
-						],
-						"geometry": "38360378-8040-4155-B66B-5A634DC36942",
-						"material": "BBE66265-584D-4E27-8514-765C6B232262"
-					}
-				]
-			}
-		],
-		"background": 11184810
-	}
-};
-
-/***/ },
+/* 3 */,
 /* 4 */
 /***/ function(module, exports) {
 
@@ -21597,7 +21432,7 @@ const MoodStates = [
 			controller.floraAndFauna.createFlamingos( 0 );
 			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.desert, false );
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
-			//controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], Textures.globe );
+			controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
@@ -21702,13 +21537,14 @@ class GlobeMoodController {
 /* harmony export (immutable) */ exports["a"] = GlobeMoodController;
 
 
+
 /***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 /* globals THREE */
-const RootAssetsPath = "./files/textures/models/";
+// const RootAssetsPath = "./files/textures/models/";
 
 
 let objectLoader = new THREE.ObjectLoader(),
@@ -21716,8 +21552,10 @@ let objectLoader = new THREE.ObjectLoader(),
 	models = {
 		vegetation: {
 			trees: {
-				Tree1: __webpack_require__( 3 ),
-				TreeDead: __webpack_require__( 4 )
+				// Tree1: require( "../../json/models/vegetation/tree-1.json" ),
+				deadTrees: {
+					DeadTree1: __webpack_require__( 4 )
+				}
 			}
 		},
 		birds: {
@@ -21739,6 +21577,7 @@ class Models {
 	}
 }
 /* harmony export (immutable) */ exports["a"] = Models;
+
 
 
 /***/ },
@@ -21787,9 +21626,11 @@ class Controls {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__textures_Textures_js__ = __webpack_require__(8);
 /* global THREE, Velocity */
 
 // imports
+
 
 
 
@@ -21801,9 +21642,10 @@ class FloraAndFauna {
 		this.globeRadius = this.globe.globeRadius;
 		this.mixers = this.globe.mixers;
 		this.models = this.globe.models;
-		this.textures = this.globe.textures;
+		this.textures = __WEBPACK_IMPORTED_MODULE_2__textures_Textures_js__["a" /* default */];
 
 		this.groupFlamingos = null;
+		this.groupTrees = null;
 		this.animation = new __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__["a" /* default */]();
 	}
 
@@ -21870,16 +21712,64 @@ class FloraAndFauna {
 		} } );
 	}
 
-	createFauna () {
-		this.createBirds();
-	}
+	changeTreeVegetation ( range = [ 10, 15 ], treeModelsType = "deadTrees" ) {
+		let newNumberOfTrees = Math.round( __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( range[ 0 ], range[ 1 ] ) ),
+			models = this.models.models.vegetation.trees[ treeModelsType ],
+			modelKeys = Object.keys( models );
 
-	createFlora () {
-		this.createTrees();
-	}
+		let addTree = ( treeMesh ) => {
+			let treeMaterial,
+				deadTreeTexture,
+				deadTreeBump,
+				treeScale = __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( 0.5, 1.5 ),
+				originGroup = new THREE.Object3D();
 
-	createBirds () {
-		this.createFlamingos();
+			deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture );
+			deadTreeBump = new THREE.TextureLoader().load( this.textures.tree.bark.bump );
+
+			treeMaterial = new THREE.MeshPhongMaterial( {
+				specular: 0xFFFFFF,
+				bumpMap: deadTreeBump,
+				bumpScale: 0.01,
+				map: deadTreeTexture,
+				shininess: 0,
+				metalness: 0,
+				shading: THREE.FlatShading
+			} );
+
+			treeMesh.scale.set( treeScale, treeScale, treeScale );
+			treeMesh.castShadow = true;
+			treeMesh.name = `Dead Tree [${ this.groupTrees.length }]`;
+
+			originGroup.add( treeMesh );
+
+			__WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
+
+			treeMesh.position.y = this.globeRadius - 0.01;
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+			this.globeGroup.add( originGroup );
+
+			return originGroup;
+		};
+
+		if ( this.groupTrees !== null ) {
+
+		} else {
+			this.groupTrees = [];
+
+			let randomModelKey,
+				parsedModel;
+
+			for ( let i = 0; i < newNumberOfTrees; i++ ) {
+				randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
+				parsedModel = this.models.getModelObject( models[ randomModelKey ] );
+
+				this.groupTrees.push( addTree( parsedModel ) );
+			}
+		}
 	}
 
 	createFlamingos ( countFlamingos ) {
@@ -21959,30 +21849,6 @@ class FloraAndFauna {
 		}
 	}
 
-	createTrees () {
-		let treeMesh = this.models.getModelObject( this.models.models.vegetation.trees.TreeDead ),
-			treeMaterial,
-			deadTreeTexture,
-			deadTreeBump;
-
-		deadTreeTexture = new THREE.TextureLoader().load( this.textures.bark );
-		deadTreeBump = new THREE.TextureLoader().load( this.textures.barkBump );
-
-		treeMaterial = new THREE.MeshPhongMaterial( {
-			specular: 0xFFFFFF,
-			bumpMap: deadTreeBump,
-			bumpScale: 0.01,
-			map: deadTreeTexture,
-			shininess: 0,
-			metalness: 0,
-			shading: THREE.FlatShading
-		} );
-
-		__WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
-		treeMesh.position.y = this.globeRadius;
-		this.globeGroup.add( treeMesh );
-	}
-
 	renderFlamingos () {
 		if ( this.groupFlamingos ) {
 			let bird,
@@ -22014,6 +21880,7 @@ class FloraAndFauna {
 	}
 }
 /* harmony export (immutable) */ exports["a"] = FloraAndFauna;
+
 
 
 /***/ },

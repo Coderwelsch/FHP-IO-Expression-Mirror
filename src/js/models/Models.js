@@ -1,5 +1,5 @@
 /* globals THREE */
-const RootAssetsPath = "./files/textures/models/";
+// const RootAssetsPath = "./files/textures/models/";
 
 
 let objectLoader = new THREE.ObjectLoader(),
@@ -7,8 +7,10 @@ let objectLoader = new THREE.ObjectLoader(),
 	models = {
 		vegetation: {
 			trees: {
-				Tree1: require( "../../json/models/vegetation/tree-1.json" ),
-				TreeDead: require( "../../json/models/vegetation/tree-dead.json" )
+				// Tree1: require( "../../json/models/vegetation/tree-1.json" ),
+				deadTrees: {
+					DeadTree1: require( "../../json/models/vegetation/tree-dead.json" )
+				}
 			}
 		},
 		birds: {

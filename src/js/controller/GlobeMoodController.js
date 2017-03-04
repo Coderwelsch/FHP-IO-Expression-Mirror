@@ -11,7 +11,7 @@ const MoodStates = [
 			controller.floraAndFauna.createFlamingos( 0 );
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.desert, false );
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
-			//controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], Textures.globe );
+			controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
