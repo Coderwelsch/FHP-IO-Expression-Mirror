@@ -13,6 +13,23 @@ export default {
 		}
 	},
 
+	getChildren ( object ) {
+		let array = [];
+
+		let find = ( object ) => {
+			if ( object.children && object.children.length ) {
+				for ( let item of object.children ) {
+					find( item, array );
+				}
+			} else if ( "material" in object ) {
+				array.push( object );
+			}
+		};
+		find( object );
+
+		return array;
+	},
+
 	moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
 		return pointVector.lerp( originVector, alpha );
 	},

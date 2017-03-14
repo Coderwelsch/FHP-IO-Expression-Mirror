@@ -63,15 +63,39 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 12);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony default export */ exports["a"] = {
+/* harmony default export */ __webpack_exports__["a"] = {
+	globe: {
+		fertile: "./files/textures/ground-texture.jpg",
+
+		desert: {
+			texture: "./files/textures/desert-texture.jpg",
+			bump: "./files/textures/desert-texture-bump.jpg"
+		},
+
+		sand: "./files/textures/sand-texture.jpg"
+	},
+	tree: {
+		bark: {
+			texture: "./files/textures/bark-texture.jpg",
+			bump: "./files/textures/bark-texture-bump.jpg"
+		}
+	}
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = {
 	randomRange ( start, end ) {
 		return Math.random() * ( end - start ) + start;
 	},
@@ -84,6 +108,23 @@
 		} else if ( "material" in object ) {
 			object.material = value;
 		}
+	},
+
+	getChildren ( object ) {
+		let array = [];
+
+		let find = ( object ) => {
+			if ( object.children && object.children.length ) {
+				for ( let item of object.children ) {
+					find( item, array );
+				}
+			} else if ( "material" in object ) {
+				array.push( object );
+			}
+		};
+		find( object );
+
+		return array;
 	},
 
 	moveVerticeAlongVector ( pointVector, originVector, alpha = 0.075 ) {
@@ -323,15 +364,15 @@
 };
 
 
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controller_GlobeMoodController_js__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Controls_js__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__models_Models_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Globe_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__controller_GlobeMoodController_js__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Controls_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__models_Models_js__ = __webpack_require__(6);
 /* global THREE */
 
 // imports
@@ -500,12 +541,12 @@ class World {
 		} );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = World;
+/* harmony export (immutable) */ __webpack_exports__["a"] = World;
 
 
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
 
 module.exports = {
 	"metadata": {
@@ -19458,10 +19499,9 @@ module.exports = {
 	]
 };
 
-/***/ },
-/* 3 */,
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 module.exports = {
 	"textures": [],
@@ -21319,106 +21359,13 @@ module.exports = {
 	]
 };
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-class Animation {
-	constructor () {
-		this.animations = [];
-	}
-
-	fadeOut ( mesh, callback ) {
-		this.generateAnimation( mesh, callback, function () {
-			if ( this.mesh.material.opacity > 0 ) {
-				this.mesh.material.opacity -= 0.01;
-			}
-
-			if ( this.mesh.material.opacity <= 0 ) {
-				this.isFinished = true;
-
-				if ( typeof this.callback === "function" ) {
-					this.callback();
-				}
-			}
-		} );
-	}
-
-	scale ( value, mesh, callback ) {
-		let increment = 0.001;
-
-		this.generateAnimation( mesh, callback, function () {
-			let scale = this.mesh.scale;
-
-			scale.x = scale.x.toFixed( 2 );
-			scale.y = scale.y.toFixed( 2 );
-			scale.z = scale.z.toFixed( 2 );
-
-			if ( !this.steep ) {
-				if ( value > scale.x ) {
-					this.steep = -increment;
-				} else {
-					this.steep = increment;
-				}
-			}
-
-			if ( scale.x < value ) {
-				this.mesh.scale.set( scale.x + this.steep, scale.y + this.steep, scale.z + this.steep );
-
-			} else if ( scale.x > value ) {
-				this.mesh.scale.set( scale.x - this.steep, scale.y - this.steep, scale.z - this.steep );
-			} else {
-				this.isFinished = true;
-			}
-		} );
-	}
-
-	fadeIn ( mesh, callback ) {
-		this.generateAnimation( mesh, callback, function () {
-			if ( this.mesh.material.opacity < 1 ) {
-				this.mesh.material.opacity += 0.01;
-			}
-
-			if ( this.mesh.material.opacity >= 1 ) {
-				this.mesh.material.opacity = 1;
-				this.isFinished = true;
-
-				if ( typeof this.callback === "function" ) {
-					this.callback();
-				}
-			}
-		} );
-	}
-
-	generateAnimation ( mesh, callback, render ) {
-		this.animations.push( {
-			mesh,
-			callback,
-			render
-		} );
-	}
-
-	render () {
-		for ( let animation of this.animations ) {
-			if ( animation.isFinished ) {
-				this.animations.splice( this.animations.indexOf( animation ), 1 );
-			} else {
-				animation.render();
-			}
-		}
-	}
-}
-/* harmony export (immutable) */ exports["a"] = Animation;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_FloraAndFauna_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__ = __webpack_require__(0);
 // imports
 
 
@@ -21444,6 +21391,7 @@ const MoodStates = [
 			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
 			controller.floraAndFauna.createFlamingos( 10 );
+			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
@@ -21483,8 +21431,12 @@ class GlobeMoodController {
 	setMoodValue ( moodValue = this.mood ) {
 		moodValue = Number( moodValue.toFixed( 1 ) );
 
-		if ( !moodValue || Number.isNaN( moodValue ) ) {
+		if ( Number.isNaN( moodValue ) ) {
 			return;
+		}
+
+		if ( moodValue < 0 ) {
+			moodValue = 0;
 		}
 
 		this.mood = moodValue;
@@ -21534,13 +21486,13 @@ class GlobeMoodController {
 		this.floraAndFauna.render();
 	}
 }
-/* harmony export (immutable) */ exports["a"] = GlobeMoodController;
+/* harmony export (immutable) */ __webpack_exports__["a"] = GlobeMoodController;
 
 
 
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* globals THREE */
@@ -21559,7 +21511,7 @@ let objectLoader = new THREE.ObjectLoader(),
 			}
 		},
 		birds: {
-			Flamingo: __webpack_require__( 2 )
+			Flamingo: __webpack_require__( 3 )
 		}
 	};
 
@@ -21576,37 +21528,13 @@ class Models {
 		return objectLoader.parse( model );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Models;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Models;
 
 
 
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ exports["a"] = {
-	globe: {
-		fertile: "./files/textures/ground-texture.jpg",
-
-		desert: {
-			texture: "./files/textures/desert-texture.jpg",
-			bump: "./files/textures/desert-texture-bump.jpg"
-		},
-
-		sand: "./files/textures/sand-texture.jpg"
-	},
-	tree: {
-		bark: {
-			texture: "./files/textures/bark-texture.jpg",
-			bump: "./files/textures/bark-texture-bump.jpg"
-		}
-	}
-};
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 class Controls {
@@ -21615,22 +21543,20 @@ class Controls {
 		this.controls = new THREE.OrbitControls( this.camera );
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Controls;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Controls;
 
 
 
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__textures_Textures_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__ = __webpack_require__(0);
 /* global THREE, Velocity */
 
 // imports
-
 
 
 
@@ -21642,11 +21568,10 @@ class FloraAndFauna {
 		this.globeRadius = this.globe.globeRadius;
 		this.mixers = this.globe.mixers;
 		this.models = this.globe.models;
-		this.textures = __WEBPACK_IMPORTED_MODULE_2__textures_Textures_js__["a" /* default */];
+		this.textures = __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */];
 
 		this.groupFlamingos = null;
 		this.groupTrees = null;
-		this.animation = new __WEBPACK_IMPORTED_MODULE_0__animation_Animation_js__["a" /* default */]();
 	}
 
 	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
@@ -21713,15 +21638,16 @@ class FloraAndFauna {
 	}
 
 	changeTreeVegetation ( range = [ 10, 15 ], treeModelsType = "deadTrees" ) {
-		let newNumberOfTrees = Math.round( __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( range[ 0 ], range[ 1 ] ) ),
+		let newNumberOfTrees = Math.round( __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( range[ 0 ], range[ 1 ] ) ),
 			models = this.models.models.vegetation.trees[ treeModelsType ],
 			modelKeys = Object.keys( models );
 
 		let addTree = ( treeMesh ) => {
-			let treeMaterial,
+			let children,
+				treeMaterial,
 				deadTreeTexture,
 				deadTreeBump,
-				treeScale = __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( 0.5, 1.5 ),
+				treeScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 0.5, 1.5 ),
 				originGroup = new THREE.Object3D();
 
 			deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture );
@@ -21734,6 +21660,8 @@ class FloraAndFauna {
 				map: deadTreeTexture,
 				shininess: 0,
 				metalness: 0,
+				opacity: 0,
+				transparent: true,
 				shading: THREE.FlatShading
 			} );
 
@@ -21743,7 +21671,7 @@ class FloraAndFauna {
 
 			originGroup.add( treeMesh );
 
-			__WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
+			__WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
 
 			treeMesh.position.y = this.globeRadius - 0.01;
 
@@ -21752,11 +21680,45 @@ class FloraAndFauna {
 			originGroup.rotation.z = Math.PI * Math.random();
 			this.globeGroup.add( originGroup );
 
+			children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( treeMesh );
+			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+				for ( let child of children ) {
+					child.needUpdate = true;
+					child.material.opacity = complete;
+				}
+			} } );
+
 			return originGroup;
 		};
 
 		if ( this.groupTrees !== null ) {
+			if ( this.groupTrees.length < range[ 0 ] ) {
+				let randomModelKey,
+					parsedModel;
 
+				for ( let i = 0; i < range[ 0 ] - this.groupTrees.length - 1; i++ ) {
+					randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
+					parsedModel = this.models.getModelObject( models[ randomModelKey ] );
+
+					this.groupTrees.push( addTree( parsedModel ) );
+				}
+			} else if ( this.groupTrees.length > range[ 1 ] ) {
+				let removedItems = this.groupTrees.splice( range[ 1 ], this.groupTrees.length ),
+					children;
+
+				for ( let tree of removedItems ) {
+					children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( tree );
+
+					for ( let child of children ) {
+						Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+							child.needUpdate = true;
+							child.material.opacity = 1 - complete;
+						} } ).then( () => {
+							this.globeGroup.remove( tree );
+						} );
+					}
+				}
+			}
 		} else {
 			this.groupTrees = [];
 
@@ -21773,11 +21735,17 @@ class FloraAndFauna {
 	}
 
 	createFlamingos ( countFlamingos ) {
+		let removeFlamingos = ( flamingos ) => {
+			for ( let flamingo of flamingos ) {
+				this.globeGroup.remove( flamingo );
+			}
+		};
+
 		let addFlamingo = () => {
 			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
 				flamingoMinScaling = 0.01,
 				flamingoMaxScaling = 0.05,
-				flamingoScale = __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
+				flamingoScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flamingoMinScaling, flamingoMaxScaling ),
 				flightHeightMinOffset = 0.15,
 				flightHeightMaxOffset = 0.25,
 				flamingoMaterial,
@@ -21798,7 +21766,7 @@ class FloraAndFauna {
 
 			flamingoMesh = new THREE.Mesh( flamingoModelObject.geometry, flamingoMaterial );
 			flamingoMesh.scale.set( flamingoScale, flamingoScale, -flamingoScale );
-			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_1__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
+			flamingoMesh.position.y = this.globeRadius * ( 1 + __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( flightHeightMinOffset, flightHeightMaxOffset ) );
 			flamingoMesh.castShadow = true;
 			flamingoMesh.name = `Flamingo [${ this.groupFlamingos.length }]`;
 
@@ -21824,14 +21792,22 @@ class FloraAndFauna {
 		if ( this.groupFlamingos ) {
 			if ( this.groupFlamingos.length > countFlamingos ) {
 				// remove flamingos
-				for ( let i = this.groupFlamingos.length - 1; i > countFlamingos - 1; i-- ) {
+				let oldFlamingosLength = this.groupFlamingos.length,
+					flamingosToRemove = this.groupFlamingos.slice( countFlamingos, oldFlamingosLength ),
+					countRemovedFlamingos = 0;
+
+				for ( let flamingo of flamingosToRemove ) {
 					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
-						this.groupFlamingos[ i ].children[ 0 ].needUpdate = true;
-						this.groupFlamingos[ i ].children[ 0 ].material.opacity = 1 - complete;
+						flamingo.children[ 0 ].needUpdate = true;
+						flamingo.children[ 0 ].material.opacity = 1 - complete;
 					} } ).then( () => {
-						this.globeGroup.remove( this.groupFlamingos[ i ] );
-						this.mixers.splice( i, 1 );
-						this.groupFlamingos.splice( i, 1 );
+						countRemovedFlamingos++;
+
+						if ( countRemovedFlamingos === flamingosToRemove.length) {
+							removeFlamingos( flamingosToRemove );
+							this.groupFlamingos.splice( countFlamingos, oldFlamingosLength );
+							this.mixers.splice( countFlamingos, oldFlamingosLength );
+						}
 					} );
 				}
 			} else if ( this.groupFlamingos.length < countFlamingos ) {
@@ -21875,20 +21851,19 @@ class FloraAndFauna {
 	}
 
 	render () {
-		this.animation.render();
 		this.renderFlamingos();
 	}
 }
-/* harmony export (immutable) */ exports["a"] = FloraAndFauna;
+/* harmony export (immutable) */ __webpack_exports__["a"] = FloraAndFauna;
 
 
 
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__ = __webpack_require__(1);
 /* global THREE */
 
 // imports
@@ -22004,16 +21979,16 @@ class Globe {
 		}
 	}
 }
-/* harmony export (immutable) */ exports["a"] = Globe;
+/* harmony export (immutable) */ __webpack_exports__["a"] = Globe;
 
 
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(1);
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__world_World_js__ = __webpack_require__(2);
 // imports
 
 
@@ -22028,10 +22003,26 @@ let world = new __WEBPACK_IMPORTED_MODULE_0__world_World_js__["a" /* default */]
 window.scene = world.scene;
 
 // test
+let direction = true;
 window.setInterval( () => {
-	let value = world.globeMoodController.getMoodValue() + 0.1;
-	world.globeMoodController.setMoodValue( value );
-}, 8000 );
+	let value = world.globeMoodController.getMoodValue();
 
-/***/ }
+	if ( value > 0.5 ) {
+		direction = false;
+	}
+
+	if ( direction ) {
+		world.globeMoodController.setMoodValue( value + 0.1 );
+	} else {
+		world.globeMoodController.setMoodValue( value - 0.1 );
+
+		if ( value < 0.1 ) {
+			direction = true;
+		}
+	}
+
+	console.log( world.globeMoodController.getMoodValue() );
+}, 4000 );
+
+/***/ })
 /******/ ]);

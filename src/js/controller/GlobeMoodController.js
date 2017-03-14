@@ -23,6 +23,7 @@ const MoodStates = [
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
 			controller.floraAndFauna.createFlamingos( 10 );
+			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
@@ -62,8 +63,12 @@ export default class GlobeMoodController {
 	setMoodValue ( moodValue = this.mood ) {
 		moodValue = Number( moodValue.toFixed( 1 ) );
 
-		if ( !moodValue || Number.isNaN( moodValue ) ) {
+		if ( Number.isNaN( moodValue ) ) {
 			return;
+		}
+
+		if ( moodValue < 0 ) {
+			moodValue = 0;
 		}
 
 		this.mood = moodValue;

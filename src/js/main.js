@@ -12,7 +12,23 @@ let world = new World();
 window.scene = world.scene;
 
 // test
+let direction = true;
 window.setInterval( () => {
-	let value = world.globeMoodController.getMoodValue() + 0.1;
-	world.globeMoodController.setMoodValue( value );
-}, 8000 );
+	let value = world.globeMoodController.getMoodValue();
+
+	if ( value > 0.5 ) {
+		direction = false;
+	}
+
+	if ( direction ) {
+		world.globeMoodController.setMoodValue( value + 0.1 );
+	} else {
+		world.globeMoodController.setMoodValue( value - 0.1 );
+
+		if ( value < 0.1 ) {
+			direction = true;
+		}
+	}
+
+	console.log( world.globeMoodController.getMoodValue() );
+}, 4000 );

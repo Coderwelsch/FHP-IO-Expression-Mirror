@@ -1,7 +1,6 @@
 /* global THREE, Velocity */
 
 // imports
-import Animation from "../animation/Animation.js";
 import Utils from "../utils/Utils.js";
 import Textures from "../textures/Textures.js";
 
@@ -17,7 +16,6 @@ export default class FloraAndFauna {
 
 		this.groupFlamingos = null;
 		this.groupTrees = null;
-		this.animation = new Animation();
 	}
 
 	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
@@ -89,7 +87,8 @@ export default class FloraAndFauna {
 			modelKeys = Object.keys( models );
 
 		let addTree = ( treeMesh ) => {
-			let treeMaterial,
+			let children,
+				treeMaterial,
 				deadTreeTexture,
 				deadTreeBump,
 				treeScale = Utils.randomRange( 0.5, 1.5 ),
@@ -105,6 +104,8 @@ export default class FloraAndFauna {
 				map: deadTreeTexture,
 				shininess: 0,
 				metalness: 0,
+				opacity: 0,
+				transparent: true,
 				shading: THREE.FlatShading
 			} );
 
@@ -123,11 +124,45 @@ export default class FloraAndFauna {
 			originGroup.rotation.z = Math.PI * Math.random();
 			this.globeGroup.add( originGroup );
 
+			children = Utils.getChildren( treeMesh );
+			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+				for ( let child of children ) {
+					child.needUpdate = true;
+					child.material.opacity = complete;
+				}
+			} } );
+
 			return originGroup;
 		};
 
 		if ( this.groupTrees !== null ) {
+			if ( this.groupTrees.length < range[ 0 ] ) {
+				let randomModelKey,
+					parsedModel;
 
+				for ( let i = 0; i < range[ 0 ] - this.groupTrees.length - 1; i++ ) {
+					randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
+					parsedModel = this.models.getModelObject( models[ randomModelKey ] );
+
+					this.groupTrees.push( addTree( parsedModel ) );
+				}
+			} else if ( this.groupTrees.length > range[ 1 ] ) {
+				let removedItems = this.groupTrees.splice( range[ 1 ], this.groupTrees.length ),
+					children;
+
+				for ( let tree of removedItems ) {
+					children = Utils.getChildren( tree );
+
+					for ( let child of children ) {
+						Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+							child.needUpdate = true;
+							child.material.opacity = 1 - complete;
+						} } ).then( () => {
+							this.globeGroup.remove( tree );
+						} );
+					}
+				}
+			}
 		} else {
 			this.groupTrees = [];
 
@@ -144,6 +179,12 @@ export default class FloraAndFauna {
 	}
 
 	createFlamingos ( countFlamingos ) {
+		let removeFlamingos = ( flamingos ) => {
+			for ( let flamingo of flamingos ) {
+				this.globeGroup.remove( flamingo );
+			}
+		};
+
 		let addFlamingo = () => {
 			let flamingoModelObject = this.models.getModelJson( this.models.models.birds.Flamingo ),
 				flamingoMinScaling = 0.01,
@@ -195,14 +236,22 @@ export default class FloraAndFauna {
 		if ( this.groupFlamingos ) {
 			if ( this.groupFlamingos.length > countFlamingos ) {
 				// remove flamingos
-				for ( let i = this.groupFlamingos.length - 1; i > countFlamingos - 1; i-- ) {
+				let oldFlamingosLength = this.groupFlamingos.length,
+					flamingosToRemove = this.groupFlamingos.slice( countFlamingos, oldFlamingosLength ),
+					countRemovedFlamingos = 0;
+
+				for ( let flamingo of flamingosToRemove ) {
 					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
-						this.groupFlamingos[ i ].children[ 0 ].needUpdate = true;
-						this.groupFlamingos[ i ].children[ 0 ].material.opacity = 1 - complete;
+						flamingo.children[ 0 ].needUpdate = true;
+						flamingo.children[ 0 ].material.opacity = 1 - complete;
 					} } ).then( () => {
-						this.globeGroup.remove( this.groupFlamingos[ i ] );
-						this.mixers.splice( i, 1 );
-						this.groupFlamingos.splice( i, 1 );
+						countRemovedFlamingos++;
+
+						if ( countRemovedFlamingos === flamingosToRemove.length) {
+							removeFlamingos( flamingosToRemove );
+							this.groupFlamingos.splice( countFlamingos, oldFlamingosLength );
+							this.mixers.splice( countFlamingos, oldFlamingosLength );
+						}
 					} );
 				}
 			} else if ( this.groupFlamingos.length < countFlamingos ) {
@@ -246,7 +295,6 @@ export default class FloraAndFauna {
 	}
 
 	render () {
-		this.animation.render();
 		this.renderFlamingos();
 	}
 }
