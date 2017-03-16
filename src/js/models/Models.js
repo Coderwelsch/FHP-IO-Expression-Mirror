@@ -9,7 +9,16 @@ let objectLoader = new THREE.ObjectLoader(),
 			trees: {
 				// Tree1: require( "../../json/models/vegetation/tree-1.json" ),
 				deadTrees: {
-					DeadTree1: require( "../../json/models/vegetation/tree-dead.json" )
+					DeadTree1: require( "../../json/models/vegetation/trees/tree-dead.json" )
+				}
+			},
+			grass: {
+				deadGrass: {
+					DeadGrass1: require( "../../json/models/vegetation/grass/grass-dead-1.json" )
+				},
+				fertileGrass: {
+					GrassPlant1: require( "../../json/models/vegetation/grass/grass-plant-1.json" ),
+					GrassPlant2: require( "../../json/models/vegetation/grass/grass-plant-2.json" )
 				}
 			}
 		},
