@@ -9,6 +9,8 @@ import argparse as ArgumentParser
 
 
 # variables
+currentDir = os.path.dirname( os.path.abspath( __file__ ) ) + "/"
+currentDir = ""
 videoCapture = None
 faceCascade = None
 fisherFaceRecognizer = None
@@ -63,13 +65,13 @@ def saveFace( emotion ):
 		findFaces()
 
 	for x in croppedFaces.keys(): #save contents of dictionary to files
-		OpenCV.imwrite( "data/dataset/%s/%s.jpg" % ( emotion, len( glob.glob( "data/dataset/%s/*" % emotion ) ) ), croppedFaces[ x ] )
+		OpenCV.imwrite( currentDir + "data/dataset/%s/%s.jpg" % ( emotion, len( glob.glob( currentDir + "data/dataset/%s/*" % emotion ) ) ), croppedFaces[ x ] )
 
 	croppedFaces.clear()
 
 def makeDirs ( emotions ):
 	for x in emotions:
-		emotionImgDir = "data/dataset/%s" % x
+		emotionImgDir = currentDir + "data/dataset/%s" % x
 
 		if os.path.exists( emotionImgDir ):
 			pass
@@ -80,9 +82,9 @@ def initVariables ():
 	global videoCapture, faceCascade, fisherFaceRecognizer
 
 	videoCapture = OpenCV.VideoCapture( 0 )
-	faceCascade = OpenCV.CascadeClassifier( "data/cascades/haarcascade_frontalface_default.xml" )
+	faceCascade = OpenCV.CascadeClassifier( currentDir + "data/cascades/haarcascade_frontalface_default.xml" )
 	fisherFaceRecognizer = OpenCV.face.createFisherFaceRecognizer()
-	fisherFaceRecognizer.load( "data/cascades/trained_emoclassifier.xml" )
+	fisherFaceRecognizer.load( currentDir + "data/cascades/trained_emoclassifier.xml" )
 
 def getProcessedFrame ():
 	global videoCapture
@@ -128,7 +130,7 @@ def findEmotion ():
 		frame = croppedFaces[ key ]
 		prediction, confidence = fisherFaceRecognizer.predict( frame )
 
-		OpenCV.imwrite( "data/images/" + str( key ) + ".jpg", frame )
+		OpenCV.imwrite( currentDir + "data/images/" + str( key ) + ".jpg", frame )
 		predictions.append( prediction )
 		confidences.append( confidence )
 

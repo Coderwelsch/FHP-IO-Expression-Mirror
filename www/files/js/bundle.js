@@ -74449,10 +74449,14 @@ const MoodStates = [
 		name: "Desert",
 		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.createFlamingos( 0 );
+			// controller.floraAndFauna.createFlamingos( 0 );
 			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.desert, false );
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
+			
 			controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], "deadTrees" );
+			
+			// controller.floraAndFauna.changeGrassVegetation( [ 0, 0 ], "deadGrass" );
+			controller.floraAndFauna.changeGrassVegetation( [ 50, 60 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
@@ -74463,8 +74467,11 @@ const MoodStates = [
 		enter: function ( controller ) {
 			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
-			controller.floraAndFauna.createFlamingos( 10 );
+			controller.floraAndFauna.createFlamingos( 0 );
 			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
+			
+			//controller.floraAndFauna.changeGrassVegetation( [ 50, 60 ], "deadTrees" );
+			controller.floraAndFauna.changeGrassVegetation( [ 0, 0 ], "deadGrass" );
 		},
 		leave: function ( controller ) {
 
@@ -74473,7 +74480,7 @@ const MoodStates = [
 		name: "Paradise",
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.createFlamingos( 20 );
+			
 		},
 		leave: function ( controller ) {
 
@@ -74482,7 +74489,7 @@ const MoodStates = [
 		name: "Utopia",
 		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.createFlamingos( 0 );
+			
 		},
 		leave: function ( controller ) {
 
@@ -74654,14 +74661,10 @@ class FloraAndFauna {
 
 		this.groupFlamingos = null;
 		this.groupTrees = null;
+		this.groupGrass = null;
 	}
 
 	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
-		// velocity tweening values
-		let newTextureOpacity = 0,
-			oldTextureOpacity = 1,
-			toFrom = [ oldTextureOpacity, newTextureOpacity ];
-
 		let clonedGlobeMesh = this.globe.globeMesh.clone(),
 			texturePath = textureObj.texture || textureObj,
 			newTexture,
@@ -74702,7 +74705,7 @@ class FloraAndFauna {
 		// add cloned globe and fade it out
 		this.globeGroup.add( clonedGlobeMesh );
 
-		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+		Velocity( document.createElement( "div" ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining ) => {
 			clonedGlobeMesh.material.opacity = 1 - complete;
 			this.globe.globeMesh.material.opacity = complete;
 		} } ).then( () => {
@@ -74711,10 +74714,9 @@ class FloraAndFauna {
 	}
 
 	changeWaterLevel ( waterLevel ) {
-		let currentScale = this.globe.waterSurfaceMesh.scale.x,
-			toFrom = [ waterLevel, currentScale ];
+		let currentScale = this.globe.waterSurfaceMesh.scale.x;
 
-		Velocity( document.createElement( "div" ), { tween: toFrom }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+		Velocity( document.createElement( "div" ), { tween: [ waterLevel, currentScale ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
 			this.globe.waterSurfaceMesh.scale.set( tweenValue, tweenValue, tweenValue );
 		} } );
 	}
@@ -74729,7 +74731,7 @@ class FloraAndFauna {
 				treeMaterial,
 				deadTreeTexture,
 				deadTreeBump,
-				treeScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 0.5, 1.5 ),
+				treeScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 0.5, 1.3 ),
 				originGroup = new THREE.Object3D();
 
 			deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture );
@@ -74747,15 +74749,15 @@ class FloraAndFauna {
 				shading: THREE.FlatShading
 			} );
 
-			treeMesh.scale.set( treeScale, treeScale, treeScale );
+			treeMesh.scale.set( 0, 0, 0 );
 			treeMesh.castShadow = true;
-			treeMesh.name = `Dead Tree [${ this.groupTrees.length }]`;
+			treeMesh.name = `${treeModelsType} [${ this.groupTrees.length }]`;
 
 			originGroup.add( treeMesh );
 
 			__WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
 
-			treeMesh.position.y = this.globeRadius - 0.01;
+			treeMesh.position.y = this.globeRadius - 0.03;
 
 			originGroup.rotation.x = Math.PI * Math.random();
 			originGroup.rotation.y = Math.PI * Math.random();
@@ -74763,7 +74765,9 @@ class FloraAndFauna {
 			this.globeGroup.add( originGroup );
 
 			children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( treeMesh );
-			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+			Velocity( ( document.createElement( "div" ) ), { tween: [ treeScale, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+				treeMesh.scale.set( tweenValue, tweenValue, tweenValue );
+
 				for ( let child of children ) {
 					child.needUpdate = true;
 					child.material.opacity = complete;
@@ -74785,20 +74789,23 @@ class FloraAndFauna {
 					this.groupTrees.push( addTree( parsedModel ) );
 				}
 			} else if ( this.groupTrees.length > range[ 1 ] ) {
-				let removedItems = this.groupTrees.splice( range[ 1 ], this.groupTrees.length ),
-					children;
+				let removedItems = this.groupTrees.splice( range[ 1 ], this.groupTrees.length );
 
-				for ( let tree of removedItems ) {
-					children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( tree );
+				for ( let originGroup of removedItems ) {
+					let tree = originGroup.children[ 0 ],
+						children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( tree ),
+						scaling = tree.scale.x;
 
-					for ( let child of children ) {
-						Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+					Velocity( ( document.createElement( "div" ) ), { tween: [ 0, scaling ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+						tree.scale.set( tweenValue, tweenValue, tweenValue );
+
+						for ( let child of children ) {
 							child.needUpdate = true;
 							child.material.opacity = 1 - complete;
-						} } ).then( () => {
-							this.globeGroup.remove( tree );
-						} );
-					}
+						}
+					} } ).then( () => {
+						this.globeGroup.remove( tree );
+					} );
 				}
 			}
 		} else {
@@ -74814,6 +74821,131 @@ class FloraAndFauna {
 				this.groupTrees.push( addTree( parsedModel ) );
 			}
 		}
+	}
+
+	changeGrassVegetation ( range = [ 10, 15 ], modelType = "fertile" ) {
+		this.groupGrass = this.manageOccurences( this.groupGrass, range, ( group ) => {
+			let treeMesh = this.models.getModelObject( this.models.models.vegetation.grass.fertileGrass.GrassPlant1 ),
+				treeMaterial,
+				treeScale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( 0.1, 0.3 ),
+				originGroup = new THREE.Object3D();
+
+			treeMaterial = new THREE.MeshPhongMaterial( {
+				color: 0x4BB548,
+				bumpScale: 0.01,
+				shininess: 0,
+				metalness: 0,
+				opacity: 0,
+				transparent: true,
+				shading: THREE.FlatShading
+			} );
+
+			treeMesh.scale.set( 0, 0, 0 );
+			treeMesh.castShadow = true;
+			treeMesh.name = `${modelType} [${ group.length }]`;
+
+			originGroup.add( treeMesh );
+
+			__WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].setDeepMaterial( treeMesh, treeMaterial );
+
+			treeMesh.position.y = this.globeRadius - 0.06;
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+			this.globeGroup.add( originGroup );
+
+			window.setTimeout( ( mesh, scale ) => {
+				let children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( mesh );
+
+				Velocity( ( document.createElement( "div" ) ), { tween: [ scale, 0 ] }, { duration: 3000, delay: Number.parseInt( 2000 + Math.random() * 5000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+					mesh.scale.set( tweenValue, tweenValue, tweenValue );
+
+					for ( let child of children ) {
+						child.needUpdate = true;
+						child.material.opacity = complete;
+					}
+				} } );
+			}, Math.random() * 6000, treeMesh, treeScale );
+
+			return originGroup;
+		}, ( elem ) => {
+			this.globeGroup.remove( elem );
+		} );
+	}
+
+	manageOccurences ( group, range, addFunction, rmFunction ) {
+		let count = Math.round( __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( range[ 0 ], range[ 1 ] ) );
+		
+		if ( group === null ) {
+			group = [];
+		}
+
+		if ( group.length < count ) { // add
+			let elementsToAdd = count - group.length;
+			
+			for ( let i = 0; i < elementsToAdd; i++ ) {
+				group.push( addFunction( group ) );
+			}
+		} else if ( group.length > count ) { // remove
+			let sliceCount = count < 1 ? 0 : count - 1,
+				elementsToRemove = group.slice( sliceCount, group.length );
+
+
+			for ( let elem of elementsToRemove ) {
+				rmFunction( elem, sliceCount, group.length );
+			}
+
+			group.splice( sliceCount, group.length );
+		}
+
+		return group;
+	}
+
+	setupMesh ( scaleRange = [ 0.1, 1 ], modelObject, materialOptions, yGlobeOffset = -0.07 ) {
+		let mesh = this.models.getModelObject( modelObject ),
+			originGroup = new THREE.Object3D(),
+			material,
+			scale = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( scaleRange[ 0 ], scaleRange[ 1 ] ),
+			children;
+
+		// extend default material
+		materialOptions = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].extend( true, {
+			color: 0xFFFFFF,
+			bumpScale: 0.01,
+			shininess: 0,
+			metalness: 0,
+			opacity: 0,
+			transparent: true,
+			shading: THREE.FlatShading
+		}, materialOptions );
+
+		material = new THREE.MeshPhongMaterial( materialOptions );
+
+		mesh.scale.set( 0, 0, 0 );
+		mesh.castShadow = true;
+		mesh.position.y = this.globeRadius + yGlobeOffset;
+
+		originGroup.add( mesh );
+
+		__WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].setDeepMaterial( mesh, material );
+
+		originGroup.rotation.x = Math.PI * Math.random();
+		originGroup.rotation.y = Math.PI * Math.random();
+		originGroup.rotation.z = Math.PI * Math.random();
+		this.globeGroup.add( originGroup );
+
+		children = __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].getChildren( mesh );
+		Velocity( ( document.createElement( "div" ) ), { tween: [ scale, 0 ] }, { duration: 3000, delay: Number.parseInt( 2000 + Math.random() * 5000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+			mesh.scale.set( tweenValue, tweenValue, tweenValue );
+
+			for ( let child of children ) {
+				child.needUpdate = true;
+				child.material.opacity = complete;
+			}
+		} } );
+
+		return mesh;
 	}
 
 	createFlamingos ( countFlamingos ) {
@@ -74865,7 +74997,7 @@ class FloraAndFauna {
 			mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1 ).play();
 			this.mixers.push( mixer );
 
-			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
+			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete ) => {
 				flamingoMesh.needUpdate = true;
 				flamingoMesh.material.opacity = complete;
 			} } );
@@ -74879,13 +75011,13 @@ class FloraAndFauna {
 					countRemovedFlamingos = 0;
 
 				for ( let flamingo of flamingosToRemove ) {
-					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining, start, tweenValue ) => {
+					Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete ) => {
 						flamingo.children[ 0 ].needUpdate = true;
 						flamingo.children[ 0 ].material.opacity = 1 - complete;
 					} } ).then( () => {
 						countRemovedFlamingos++;
 
-						if ( countRemovedFlamingos === flamingosToRemove.length) {
+						if ( countRemovedFlamingos === flamingosToRemove.length ) {
 							removeFlamingos( flamingosToRemove );
 							this.groupFlamingos.splice( countFlamingos, oldFlamingosLength );
 							this.mixers.splice( countFlamingos, oldFlamingosLength );
@@ -75104,7 +75236,7 @@ window.setInterval( () => {
 	}
 
 	console.log( world.globeMoodController.getMoodValue() );
-}, 4000 );
+}, 7000 );
 
 /***/ }
 /******/ ]);

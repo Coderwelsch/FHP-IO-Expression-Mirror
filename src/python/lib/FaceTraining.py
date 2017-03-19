@@ -1,9 +1,11 @@
 import cv2 as OpenCV
 import glob
 import random
+import os
 import numpy as np
 
 fishface = OpenCV.face.createFisherFaceRecognizer()
+currentDir = os.path.dirname( os.path.abspath( __file__ ) ) + "/"
 data = {}
 
 def make_sets(emotions):
@@ -11,7 +13,7 @@ def make_sets(emotions):
 	training_labels = []
 
 	for emotion in emotions:
-		training = training = glob.glob( "data/dataset/%s/*" % emotion )
+		training = training = glob.glob( currentDir + "data/dataset/%s/*" % emotion )
 
 		for item in training:
 			image = OpenCV.imread( item )
@@ -32,5 +34,5 @@ def update( emotions ):
 	run_recognizer( emotions )
 	print("saving model")
 
-	fishface.save( "data/cascades/trained_emoclassifier.xml" )
+	fishface.save( currentDir + "data/cascades/trained_emoclassifier.xml" )
 	print("model saved!")
