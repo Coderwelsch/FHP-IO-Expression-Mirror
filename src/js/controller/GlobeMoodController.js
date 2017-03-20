@@ -8,14 +8,11 @@ const MoodStates = [
 		name: "Desert",
 		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
 		enter: function ( controller ) {
-			// controller.floraAndFauna.createFlamingos( 0 );
+			// controller.floraAndFauna.changeFlamingoFauna( [ 0, 10 ] );
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.desert, false );
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
 			
-			controller.floraAndFauna.changeTreeVegetation( [ 10, 15 ], "deadTrees" );
-			
-			// controller.floraAndFauna.changeGrassVegetation( [ 0, 0 ], "deadGrass" );
-			controller.floraAndFauna.changeGrassVegetation( [ 50, 60 ], "deadTrees" );
+			controller.floraAndFauna.changeTreeVegetation( [ 5, 10 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
 
@@ -26,20 +23,20 @@ const MoodStates = [
 		enter: function ( controller ) {
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
-			controller.floraAndFauna.createFlamingos( 0 );
+			// controller.floraAndFauna.changeFlamingoFauna( [ 0, 0 ] );
 			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
 			
 			//controller.floraAndFauna.changeGrassVegetation( [ 50, 60 ], "deadTrees" );
-			controller.floraAndFauna.changeGrassVegetation( [ 0, 0 ], "deadGrass" );
+			controller.floraAndFauna.changeGrassVegetation();
 		},
 		leave: function ( controller ) {
 
 		}
 	}, {
-		name: "Paradise",
+		name: "First-Seed",
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
-			
+			controller.floraAndFauna.changeGrassVegetation( [ 100, 150 ], "deadGrass" );
 		},
 		leave: function ( controller ) {
 

@@ -22,16 +22,11 @@
         "type": "Scene",
         "matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
     },
-    "images": [{
-        "uuid": "92138B50-79C2-37B6-BD8F-9660EE3142EF",
-        "name": "texfile4.tif",
-        "url": "texfile4.tif"
-    }],
+    "images": [],
     "textures": [{
         "anisotropy": 1,
         "magFilter": 1006,
         "mapping": 300,
-        "name": "texfile4_tif",
         "minFilter": 1008,
         "wrap": [1000,1000],
         "uuid": "F2333B6E-1D5C-3CB1-B7A9-4A52B744F2D7",

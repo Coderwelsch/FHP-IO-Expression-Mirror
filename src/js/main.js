@@ -31,4 +31,4 @@ window.setInterval( () => {
 	}
 
 	console.log( world.globeMoodController.getMoodValue() );
-}, 7000 );
+}, 10000 );
