@@ -1,3 +1,5 @@
+/* global THREE */
+
 export default {
 	randomRange ( start, end ) {
 		return Math.random() * ( end - start ) + start;
@@ -44,6 +46,13 @@ export default {
 		}
 
 		return foundVertices;
+	},
+
+	getCenterOf3dVectorsArray ( vectorArray ) {
+		let geometry = new THREE.Geometry();
+		geometry.vertices = vectorArray;
+		geometry.computeBoundingSphere();
+		return geometry.boundingSphere.center;
 	},
 
 	merge ( geometry1, geometry2, materialIndexOffset ) {
@@ -182,6 +191,7 @@ export default {
 
 	randomPointsInBufferGeometry: function ( geometry, n ) {
 		var i,
+			area,
 			vertices = geometry.attributes.position.array,
 			totalArea = 0,
 			cumulativeAreas = [],
@@ -261,7 +271,7 @@ export default {
 	}(),
 
 	center: function ( geometry ) {
-		console.warn( "THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead." );
+		window.console.warn( "THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead." );
 		return geometry.center();
 	}
 };

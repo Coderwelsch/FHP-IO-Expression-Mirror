@@ -13,10 +13,16 @@ export default class Globe {
 		this.globePolygons = 64;
 		this.globePolygonTransformMultiplier = 1.5;
 
+		this.globeGeometry = null;
+
 		this.clock = new THREE.Clock();
 		this.scene = scene;
 		this.mixers = [];
 		this.models = models;
+		this.waterHoles = {
+			holes: [],
+			centers: []
+		};
 
 		this.init();
 	}
@@ -79,16 +85,29 @@ export default class Globe {
 		let globeVertices = this.globeMesh.geometry.vertices,
 			nearVeticesIndexes,
 			verticeIndex = 0,
+			holeVectors,
 			numberOfHoles = Math.round( Utils.randomRange( 3, 6 ) );
+
+		this.waterHoles.holes = new Array( numberOfHoles );
+		this.waterHoles.centers = new Array( numberOfHoles );
 
 		for ( let i = 0; i < numberOfHoles; i++ ) {
 			let randomVertexPoint = globeVertices[ Number.parseInt( Math.random() * globeVertices.length, 10 ) ];
+			holeVectors = [];
 
 			nearVeticesIndexes = Utils.findIndexesOfNearVertices( globeVertices, randomVertexPoint );
 			for ( let k = 0; k < nearVeticesIndexes.length; k++ ) {
 				verticeIndex = nearVeticesIndexes[ k ];
-				globeVertices[ verticeIndex ] = Utils.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ) );
+				globeVertices[ verticeIndex ] = Utils.moveVerticeAlongVector( globeVertices[ verticeIndex ], new THREE.Vector3( 0, 0, 0 ), 0.075 );
+				holeVectors.push( globeVertices[ verticeIndex ] );
 			}
+
+			this.waterHoles.holes[ i ] = holeVectors;
+		}
+
+		// calc centers of holes
+		for ( let i = 0, l = this.waterHoles.holes.length; i < l; i++ ) {
+			this.waterHoles.centers[ i ] = Utils.getCenterOf3dVectorsArray( this.waterHoles.holes[ i ].slice( 0 ) );
 		}
 	}
 

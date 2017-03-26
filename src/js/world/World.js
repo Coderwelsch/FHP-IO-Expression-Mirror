@@ -4,8 +4,8 @@
 import Globe from "./Globe.js";
 import GlobeMoodController from "../controller/GlobeMoodController.js";
 import Controls from "./Controls.js";
+import Stats from "../utils/stats.js";
 import Models from "../models/Models.js";
-
 
 export default class World {
 	constructor ( mood = 0, globeRadius = 50, cameraOffset = 120 ) {
@@ -15,6 +15,7 @@ export default class World {
 		this.cameraOffset = cameraOffset;
 
 		this.ratio = window.devicePixelRatio;
+		// this.ratio = 1;
 		this.width = window.innerWidth;
 		this.height = window.innerHeight;
 
@@ -28,6 +29,9 @@ export default class World {
 		this.models = null;
 		this.controls = null;
 
+		// debug
+		this.stats = null;
+
 		this.globe = null;
 		this.globeMoodController = null;
 
@@ -35,6 +39,7 @@ export default class World {
 
 		// init
 		this.init();
+		this.initStatsViewer();
 		this.startRenderer();
 		this.bindEvents();
 	}
@@ -71,6 +76,12 @@ export default class World {
 		this.initLightning();
 		this.initWorld();
 		this.initGlobeMoodStateController();
+	}
+
+	initStatsViewer () {
+		this.stats = new Stats();
+		this.stats.showPanel( 0 );
+		document.body.appendChild( this.stats.dom );
 	}
 
 	initGlobeMoodStateController () {
@@ -126,6 +137,8 @@ export default class World {
 	}
 
 	runRenderLoop () {
+		this.stats.begin();
+
 		for ( let renderItem of this.objectsToRender ) {
 			if ( renderItem && typeof renderItem.render === "function" ) {
 				renderItem.render();
@@ -133,6 +146,8 @@ export default class World {
 		}
 
 		this.renderer.render( this.scene, this.camera );
+
+		this.stats.end();
 
 		if ( this.rendererIsRunning ) {
 			window.requestAnimationFrame( () => {

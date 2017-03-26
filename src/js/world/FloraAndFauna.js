@@ -61,7 +61,7 @@ export default class FloraAndFauna {
 		// add cloned globe and fade it out
 		this.globeGroup.add( clonedGlobeMesh );
 
-		Velocity( document.createElement( "div" ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete, remaining ) => {
+		Velocity( document.createElement( "div" ), { tween: [ 1, 0 ] }, { duration: 6000, progress: ( elements, complete ) => {
 			clonedGlobeMesh.material.opacity = 1 - complete;
 			this.globe.globeMesh.material.opacity = complete;
 		} } ).then( () => {
@@ -87,17 +87,21 @@ export default class FloraAndFauna {
 		this.groupTrees = this.manageOccurences( this.groupTrees, range, () => {
 			randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
 
-			return this.setupMesh( 
-				[ 0.5, 1.3 ], 
-				models[ randomModelKey ], 
-				{ 
+			return this.setupMesh(
+				[ 0.5, 1 ],
+				models[ randomModelKey ],
+				{
 					bumpMap: deadTreeBump,
 					map: deadTreeTexture
-				} 
+				},
+				undefined,
+				undefined,
+				undefined,
+				this.getRandomGlobeVector()
 			);
 		}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 			let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
-			
+
 			for ( let elem of itemsToRemove ) {
 				this.globeGroup.remove( elem );
 			}
@@ -112,14 +116,18 @@ export default class FloraAndFauna {
 		this.groupGrass = this.manageOccurences( this.groupGrass, range, () => {
 			randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
 
-			return this.setupMesh( 
-				[ 0.05, 0.15 ], 
-				models[ randomModelKey ], 
-				{ color: 0x40993F } 
+			return this.setupMesh(
+				[ 0.05, 0.15 ],
+				models[ randomModelKey ],
+				{ color: 0x519423 },
+				undefined,
+				undefined,
+				undefined,
+				this.getRandomGlobeVector()
 			);
 		}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 			let itemsToRemove = this.groupGrass.splice( indexRemovedFrom, indexRemovedTo );
-			
+
 			for ( let elem of itemsToRemove ) {
 				this.globeGroup.remove( elem );
 			}
@@ -128,9 +136,9 @@ export default class FloraAndFauna {
 
 	changeFlamingoFauna ( range = [ 0, 0 ] ) {
 		this.groupFlamingos = this.manageOccurences( this.groupFlamingos, range, () => {
-			return this.setupMesh( 
-				[ 0.01, 0.05 ], 
-				this.models.models.birds.Flamingo, 
+			return this.setupMesh(
+				[ 0.01, 0.05 ],
+				this.models.models.birds.Flamingo,
 				{
 					color: 0xffffff,
 					specular: 0xffffff,
@@ -138,8 +146,8 @@ export default class FloraAndFauna {
 					morphTargets: true,
 					vertexColors: THREE.FaceColors
 				},
-				13,
-				true, 
+				17,
+				true,
 				{
 					x: 1,
 					y: 1,
@@ -148,7 +156,7 @@ export default class FloraAndFauna {
 			);
 		}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 			let itemsToRemove = this.groupFlamingos.splice( indexRemovedFrom, indexRemovedTo );
-			
+
 			for ( let i = 0; i < itemsToRemove.length; i++ ) {
 				this.fadeOutObject( itemsToRemove[ i ], i === itemsToRemove.length - 1, () => {
 					for ( let elem of itemsToRemove ) {
@@ -160,6 +168,42 @@ export default class FloraAndFauna {
 				} );
 			}
 		} );
+	}
+
+	changeSwimmingDucks () {
+		let model = this.globe.models.getModelObject( this.globe.models.models.birds.SwimmingDuck );
+		this.globeGroup.add( model );
+	}
+
+	getRandomGlobeVector () {
+		let vector,
+			vertices = this.globe.globeMesh.geometry.vertices,
+			waterHoles = this.globe.waterHoles.holes,
+			isHoleVector = true,
+			holeVectorFound;
+
+		while ( isHoleVector ) {
+			holeVectorFound = false;
+			vector = vertices[ Math.floor( Math.random() * vertices.length ) ];
+
+			for ( let hole of waterHoles ) {
+				for ( let holeVector of hole ) {
+					if ( holeVector === vector ) {
+						holeVectorFound = true;
+						break;
+					}
+				}
+
+				if ( holeVectorFound ) {
+					isHoleVector = true;
+					break;
+				}
+			}
+
+			isHoleVector = holeVectorFound;
+		}
+
+		return vector;
 	}
 
 	fadeOutObject ( elem, isLastElem, callback ) {
@@ -182,14 +226,14 @@ export default class FloraAndFauna {
 
 	manageOccurences ( group, range, addFunction, rmFunction, rmDoneCallback ) {
 		let count = Math.round( Utils.randomRange( range[ 0 ], range[ 1 ] ) );
-		
+
 		if ( group === null ) {
 			group = [];
 		}
 
 		if ( group.length < count ) { // add
 			let elementsToAdd = count - group.length;
-			
+
 			for ( let i = 0; i < elementsToAdd; i++ ) {
 				group.push( addFunction() );
 			}
@@ -199,7 +243,7 @@ export default class FloraAndFauna {
 
 
 			for ( let i = 0; i < elementsToRemove.length; i++ ) {
-				rmFunction( elementsToRemove[ i ], i === elementsToRemove.length - 1, () => { 
+				rmFunction( elementsToRemove[ i ], i === elementsToRemove.length - 1, () => {
 					rmDoneCallback( sliceCount, group.length );
 				} );
 			}
@@ -208,18 +252,18 @@ export default class FloraAndFauna {
 		return group;
 	}
 
-	setupMesh ( scaleRange = [ 0.1, 1 ], modelObject, materialOptions, yGlobeOffset = -0.07, isAnimation, customScaleMultiplier ) {
-		let model = isAnimation ? this.models.getModelJson( modelObject ) : undefined, 
+	setupMesh ( scaleRange = [ 0.1, 1 ], modelObject, materialOptions, yGlobeOffset = -0.07, isAnimation, customScaleMultiplier, customPosition ) {
+		let model = isAnimation ? this.models.getModelJson( modelObject ) : undefined,
 			mesh = isAnimation ? model : this.models.getModelObject( modelObject ),
-			originGroup = new THREE.Object3D(),
+			originGroup,
 			material,
 			scale = Utils.randomRange( scaleRange[ 0 ], scaleRange[ 1 ] ),
-			children;
+			children,
+			meshToReturn = mesh;
 
 		// extend default material
 		materialOptions = CwUtils.extend( true, {
 			color: 0xFFFFFF,
-			bumpScale: 0.01,
 			shininess: 0,
 			metalness: 0,
 			opacity: 0,
@@ -232,28 +276,59 @@ export default class FloraAndFauna {
 		// reset mesh to mesh's geometry to animation json data
 		if ( isAnimation ) {
 			mesh = new THREE.Mesh( mesh.geometry, materialOptions );
+
+			originGroup = new THREE.Object3D();
+
+			originGroup.rotation.x = Math.PI * Math.random();
+			originGroup.rotation.y = Math.PI * Math.random();
+			originGroup.rotation.z = Math.PI * Math.random();
+
+			originGroup.add( mesh );
+			originGroup.updateMatrixWorld();
+
+			this.globeGroup.add( originGroup );
+		} else {
+			this.globeGroup.add( mesh );
 		}
 
 		mesh.scale.set( 0, 0, 0 );
 		mesh.castShadow = true;
-		mesh.position.y = this.globeRadius + yGlobeOffset;
-
-		originGroup.add( mesh );
 
 		Utils.setDeepMaterial( mesh, material );
 
-		originGroup.rotation.x = Math.PI * Math.random();
-		originGroup.rotation.y = Math.PI * Math.random();
-		originGroup.rotation.z = Math.PI * Math.random();
-		this.globeGroup.add( originGroup );
+		// reset mesh to the nearest globe vector point
+		let globeVertices = this.globe.globeMesh.geometry.vertices,
+			randomGlobeVertex = customPosition || globeVertices[ Math.floor( Math.random() * globeVertices.length ) ];
 
-		// add animation to mixer
-		if ( isAnimation ) {
+		if ( !isAnimation ) {
+			mesh.position.set( randomGlobeVertex.x, randomGlobeVertex.y, randomGlobeVertex.z );
+
+			// look at point
+			mesh.lookAt( Utils.moveVerticeAlongVector( new THREE.Vector3( 0, 0, 0 ), randomGlobeVertex, 1.5 ) );
+
+			// rotate x axis to lookat point
+			mesh.rotateX( Math.PI / 2 );
+
+			// add some random rotation
+			mesh.rotateX( THREE.Math.degToRad( 15 ) * Math.random() );
+			mesh.rotateY( THREE.Math.degToRad( 90 ) * Math.random() );
+			mesh.rotateZ( THREE.Math.degToRad( 15 ) * Math.random() );
+		} else {
+			// set height position of mesh in origin group
+			mesh.position.y = this.globeRadius + yGlobeOffset;
+
+			// add animation to mixer
 			let mixer = new THREE.AnimationMixer( mesh );
+
 			mixer.clipAction( model.geometry.animations[ 0 ] ).setDuration( 1 ).play();
 			this.mixers.push( mixer );
+
+			// set returned mesh
+			meshToReturn = originGroup;
 		}
 
+
+		// fade-in/out animation
 		children = Utils.getChildren( mesh );
 		Velocity( ( document.createElement( "div" ) ), { tween: [ scale, 0 ] }, { duration: 3000, delay: Number.parseInt( 2000 + Math.random() * 5000, 10 ), progress: ( elements, complete, remaining, start, tweenValue ) => {
 			if ( customScaleMultiplier ) {
@@ -268,64 +343,10 @@ export default class FloraAndFauna {
 			}
 		} } );
 
-		return originGroup;
+		return meshToReturn;
 	}
 
-	createFlamingos ( countFlamingos ) {
-		// let removeFlamingos = ( flamingos ) => {
-		// 	for ( let flamingo of flamingos ) {
-		// 		this.globeGroup.remove( flamingo );
-		// 	}
-		// };
-
-		// let addFlamingo = () => {
-		// 	mixer = new THREE.AnimationMixer( flamingoMesh );
-		// 	mixer.clipAction( flamingoModelObject.geometry.animations[ 0 ] ).setDuration( 1 ).play();
-		// 	this.mixers.push( mixer );
-
-		// 	Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, delay: Number.parseInt( Math.random() * 2000, 10 ), progress: ( elements, complete ) => {
-		// 		flamingoMesh.needUpdate = true;
-		// 		flamingoMesh.material.opacity = complete;
-		// 	} } );
-		// };
-
-		// if ( this.groupFlamingos ) {
-		// 	if ( this.groupFlamingos.length > countFlamingos ) {
-		// 		// remove flamingos
-		// 		let oldFlamingosLength = this.groupFlamingos.length,
-		// 			flamingosToRemove = this.groupFlamingos.slice( countFlamingos, oldFlamingosLength ),
-		// 			countRemovedFlamingos = 0;
-
-		// 		for ( let flamingo of flamingosToRemove ) {
-		// 			Velocity( ( document.createElement( "div" ) ), { tween: [ 1, 0 ] }, { duration: 3000, progress: ( elements, complete ) => {
-		// 				flamingo.children[ 0 ].needUpdate = true;
-		// 				flamingo.children[ 0 ].material.opacity = 1 - complete;
-		// 			} } ).then( () => {
-		// 				countRemovedFlamingos++;
-
-		// 				if ( countRemovedFlamingos === flamingosToRemove.length ) {
-		// 					removeFlamingos( flamingosToRemove );
-		// 					this.groupFlamingos.splice( countFlamingos, oldFlamingosLength );
-		// 					this.mixers.splice( countFlamingos, oldFlamingosLength );
-		// 				}
-		// 			} );
-		// 		}
-		// 	} else if ( this.groupFlamingos.length < countFlamingos ) {
-		// 		// add flamingos
-		// 		for ( let i = this.groupFlamingos.length - 1; i < countFlamingos - 1; i++ ) {
-		// 			addFlamingo();
-		// 		}
-		// 	}
-		// } else {
-		// 	this.groupFlamingos = [];
-
-		// 	for ( let i = 0; i < countFlamingos - 1; i++ ) {
-		// 		addFlamingo();
-		// 	}
-		// }
-	}
-
-	renderFlamingos () {
+	updateFlamingosPosition () {
 		if ( this.groupFlamingos ) {
 			let bird,
 				oldPosition,
@@ -333,6 +354,7 @@ export default class FloraAndFauna {
 				finalPosition;
 
 			for ( let group of this.groupFlamingos ) {
+				// flamingos are wrapped with an 'origin' 3d object
 				bird = group.children[ 0 ];
 
 				oldPosition = group.localToWorld( new THREE.Vector3( bird.position.x, bird.position.y, bird.position.z ) );
@@ -351,6 +373,6 @@ export default class FloraAndFauna {
 	}
 
 	render () {
-		this.renderFlamingos();
+		this.updateFlamingosPosition();
 	}
 }

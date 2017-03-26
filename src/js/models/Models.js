@@ -1,6 +1,8 @@
 /* globals THREE */
 // const RootAssetsPath = "./files/textures/models/";
 
+import OBJLoader from "../loader/OBJLoader.js";
+
 
 let objectLoader = new THREE.ObjectLoader(),
 	jsonLoader = new THREE.JSONLoader(),
@@ -23,7 +25,11 @@ let objectLoader = new THREE.ObjectLoader(),
 			}
 		},
 		birds: {
-			Flamingo: require( "../../json/models/birds/flamingo.json" )
+			Flamingo: require( "../../json/models/birds/flamingo.json" ),
+			SwimmingDuck: {
+				model: require( "../../json/models/birds/swimming-duck.json" ),
+				texSrc: "files/textures/models/birds/swimming-duck/DUCK.JPG"
+			}
 		}
 	};
 
@@ -37,6 +43,23 @@ export default class Models {
 	}
 
 	getModelObject ( model ) {
-		return objectLoader.parse( model );
+		let mesh;
+
+		if ( "texSrc" in model ) {
+			let texture = THREE.ImageUtils.loadTexture( model.texSrc );
+
+			mesh = objectLoader.parse( model.model );
+
+			mesh.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					child.material.map = texture;
+					child.material.needsUpdate = true;
+				}
+			} );
+		} else {
+			mesh = objectLoader.parse( model );
+		}
+
+		return mesh;
 	}
 }

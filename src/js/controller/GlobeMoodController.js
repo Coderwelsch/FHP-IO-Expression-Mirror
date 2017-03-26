@@ -3,15 +3,16 @@ import FloraAndFauna from "../world/FloraAndFauna.js";
 import Textures from "../textures/Textures.js";
 
 
-const MoodStates = [
+const MoodStates = [ 
 	{
 		name: "Desert",
 		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
 		enter: function ( controller ) {
-			// controller.floraAndFauna.changeFlamingoFauna( [ 0, 10 ] );
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.desert, false );
+			controller.floraAndFauna.changeSwimmingDucks();
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
-			
+			controller.floraAndFauna.changeGrassVegetation();
+			controller.floraAndFauna.changeFlamingoFauna();
 			controller.floraAndFauna.changeTreeVegetation( [ 5, 10 ], "deadTrees" );
 		},
 		leave: function ( controller ) {
@@ -23,11 +24,8 @@ const MoodStates = [
 		enter: function ( controller ) {
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
-			// controller.floraAndFauna.changeFlamingoFauna( [ 0, 0 ] );
-			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
-			
-			//controller.floraAndFauna.changeGrassVegetation( [ 50, 60 ], "deadTrees" );
-			controller.floraAndFauna.changeGrassVegetation();
+			controller.floraAndFauna.changeTreeVegetation();
+			controller.floraAndFauna.changeGrassVegetation( [ 10, 20 ] );
 		},
 		leave: function ( controller ) {
 
@@ -36,16 +34,18 @@ const MoodStates = [
 		name: "First-Seed",
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.changeGrassVegetation( [ 100, 150 ], "deadGrass" );
+			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassDryMud, false );
+			controller.floraAndFauna.changeGrassVegetation( [ 500, 1000 ], "deadGrass" );
 		},
 		leave: function ( controller ) {
 
 		}
 	}, {
-		name: "Utopia",
+		name: "Its-Growing",
 		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
 		enter: function ( controller ) {
-			
+			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassFertile, false );
+			// controller.floraAndFauna.changeGrassVegetation( [ 200, 400 ], "deadGrass" );
 		},
 		leave: function ( controller ) {
 

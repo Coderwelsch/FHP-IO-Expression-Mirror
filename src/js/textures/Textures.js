@@ -7,7 +7,11 @@ export default {
 			bump: "./files/textures/desert-texture-bump.jpg"
 		},
 
-		sand: "./files/textures/sand-texture.jpg"
+		sand: "./files/textures/sand-texture.jpg",
+
+		grassDryMud: "./files/textures/grass-dry-mud-texture.jpg",
+
+		grassFertile: "./files/textures/fertile-grass-texture.jpg"
 	},
 	tree: {
 		bark: {
