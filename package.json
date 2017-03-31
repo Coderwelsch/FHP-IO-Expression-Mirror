@@ -17,8 +17,7 @@
     "webpack": "^2.2.0-rc.3"
   },
   "scripts": {
-    "start": "node index.js",
-    "watch": "npm start & webpack --watch --config webpack.config.js",
+    "watch": "node index.js & webpack --watch --config webpack.config.js",
     "build": "babel ./src/js/ -d ./www/files/js/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

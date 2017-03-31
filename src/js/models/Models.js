@@ -1,7 +1,6 @@
-/* globals THREE */
-// const RootAssetsPath = "./files/textures/models/";
-
-import OBJLoader from "../loader/OBJLoader.js";
+import "../loader/DDSLoader.js";
+import "../loader/OBJLoader.js";
+import "../loader/MTLLoader.js";
 
 
 let objectLoader = new THREE.ObjectLoader(),
@@ -27,9 +26,45 @@ let objectLoader = new THREE.ObjectLoader(),
 		birds: {
 			Flamingo: require( "../../json/models/birds/flamingo.json" ),
 			SwimmingDuck: {
-				model: require( "../../json/models/birds/swimming-duck.json" ),
-				texSrc: "files/textures/models/birds/swimming-duck/DUCK.JPG"
+				dir: "files/textures/models/birds/swimming-duck/",
+				objSrc: "DUCK.OBJ",
+				mtlSrc: "DUCK.MTL"
+			},
+			Test: {
+				dir: "files/textures/models/birds/test/",
+				objSrc: "test.obj",
+				mtlSrc: "test.mtl"
 			}
+		},
+		insects: {
+			Bee: require( "../../json/models/insects/bee.json" )
+			// Bee: {
+			// 	dir: "files/textures/models/insects/bee/",
+			// 	objSrc: "bee.obj",
+			// 	mtlSrc: "bee.mtl"
+			// }
+		},
+		horses: {
+			Horse: {
+				dir: "files/textures/models/horses/Horse/",
+				objSrc: "Horse.obj",
+				mtlSrc: "Horse.mtl"
+			}
+		},
+		test: {
+			dir: "files/textures/models/test/",
+			objSrc: "test.obj",
+			mtlSrc: "test.mtl"
+		},
+		Fen: {
+			dir: "files/textures/models/test/",
+			objSrc: "fen.obj",
+			mtlSrc: "fen.mtl"
+		},
+		Wood: {
+			dir: "files/textures/models/test/",
+			objSrc: "wood.obj",
+			mtlSrc: "wood.mtl"
 		}
 	};
 
@@ -61,5 +96,22 @@ export default class Models {
 		}
 
 		return mesh;
+	}
+
+	loadObjMtlModel ( model, callback ) {
+		let mtlLoader = new THREE.MTLLoader(),
+			objLoader = new THREE.OBJLoader();
+
+		// load material (.mtl) file at first
+		mtlLoader.setBaseUrl( model.dir );
+		mtlLoader.setPath( model.dir );
+		mtlLoader.load( model.mtlSrc, ( material ) => {
+			material.preload();
+
+			// obj preparation
+			objLoader.setMaterials( material );
+			objLoader.setPath( model.dir );
+			objLoader.load( model.objSrc, callback );
+		} );
 	}
 }

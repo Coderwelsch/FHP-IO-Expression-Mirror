@@ -7,7 +7,7 @@ newmtl duck_body
   Kd 0 0 0
   Ks 0 0 0
   illum 2
-  map_Kd images\duck.tif
+  map_Kd DUCK.TIF
 
 newmtl duck_eye
   Ka 0 0 0

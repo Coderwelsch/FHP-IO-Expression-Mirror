@@ -171,8 +171,33 @@ export default class FloraAndFauna {
 	}
 
 	changeSwimmingDucks () {
-		let model = this.globe.models.getModelObject( this.globe.models.models.birds.SwimmingDuck );
-		this.globeGroup.add( model );
+		// let bee = this.models.getModelJson( this.models.models.insects.Bee ),
+		// 	material = new THREE.MeshPhongMaterial(),
+		// 	mesh = new THREE.Mesh( bee.geometry, material );
+		
+		//this.globeGroup.add( mesh );
+		//console.log( bee );
+
+		// let model = this.globe.models.loadObjMtlModel( this.globe.models.models.test, ( mesh ) => {
+		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
+		// 	mesh.position.y = 55;
+			
+		// 	this.globeGroup.add( mesh );
+		// } );
+
+		// let fen = this.globe.models.loadObjMtlModel( this.globe.models.models.Fen, ( mesh ) => {
+		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
+		// 	mesh.position.y = 55;
+			
+		// 	this.globeGroup.add( mesh );
+		// } );
+
+		// let wood = this.globe.models.loadObjMtlModel( this.globe.models.models.Wood, ( mesh ) => {
+		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
+		// 	mesh.position.y = 55;
+			
+		// 	this.globeGroup.add( mesh );
+		// } );
 	}
 
 	getRandomGlobeVector () {
