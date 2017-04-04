@@ -20,6 +20,35 @@ export default class FloraAndFauna {
 		this.groupGrass = null;
 	}
 
+	loadModels ( models = [], callback ) {
+		let meshes = new Array( models.length ),
+			loadedModels = 0;
+
+		let modelLoaded = ( mesh ) => {
+			meshes[ loadedModels ] = mesh;
+
+			if ( loadedModels === models.length - 1 ) {
+				callback( meshes );
+			} else {
+				loadedModels++;
+			}
+		};
+
+		let load = ( model ) => {
+			if ( model.type === "obj" ) {
+				this.models.loadObjMtlModel( model, modelLoaded );
+			} else if ( model.type === "json" ) {
+				modelLoaded( this.models.getModelObject( model ) );
+			} else {
+				throw new Error( "Couldn't found model type: %s", model.type );
+			}
+		};
+
+		for ( let model of models ) {
+			load( model );
+		}
+	}
+
 	changeGlobeMaterial ( textureObj, useBumpMap = false, bumpScale = 0.02, repeation = 5 ) {
 		let clonedGlobeMesh = this.globe.globeMesh.clone(),
 			texturePath = textureObj.texture || textureObj,
@@ -78,45 +107,51 @@ export default class FloraAndFauna {
 	}
 
 	changeTreeVegetation ( range = [ 0, 0 ], treeModelsType = "deadTrees" ) {
-		let models = this.models.models.vegetation.trees[ treeModelsType ],
-			modelKeys = Object.keys( models ),
-			randomModelKey,
-			deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture ),
-			deadTreeBump = new THREE.TextureLoader().load( this.textures.tree.bark.bump );
+		let modelsType = this.models.models.vegetation.trees[ treeModelsType ],
+			models = []; //,
+			// deadTreeTexture = new THREE.TextureLoader().load( this.textures.tree.bark.texture ),
+			// deadTreeBump = new THREE.TextureLoader().load( this.textures.tree.bark.bump );
 
-		this.groupTrees = this.manageOccurences( this.groupTrees, range, () => {
-			randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
+		for ( let modelKey in modelsType ) {
+			models.push( modelsType[ modelKey ] );
+		}
 
-			return this.setupMesh(
-				[ 0.5, 1 ],
-				models[ randomModelKey ],
-				{
-					bumpMap: deadTreeBump,
-					map: deadTreeTexture
-				},
-				undefined,
-				undefined,
-				undefined,
-				this.getRandomGlobeVector()
-			);
-		}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
-			let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+		this.loadModels( models, ( loadedModels ) => {
+			this.groupTrees = this.manageOccurences( this.groupTrees, range, () => {
+				let index = Math.floor( Math.random() * loadedModels.length ),
+					model = loadedModels[ index ];
 
-			for ( let elem of itemsToRemove ) {
-				this.globeGroup.remove( elem );
-			}
+				return this.setupMesh(
+					[ 0.5, 1 ],
+					model,
+					{
+						// bumpMap: deadTreeBump,
+						// map: deadTreeTexture
+					},
+					undefined,
+					undefined,
+					undefined,
+					this.getRandomGlobeVector()
+				);
+			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
+				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+
+				for ( let elem of itemsToRemove ) {
+					this.globeGroup.remove( elem );
+				}
+			} );
 		} );
 	}
 
 	changeGrassVegetation ( range = [ 0, 0 ], modelType = "deadGrass" ) {
 		let models = this.models.models.vegetation.grass[ modelType ],
+			mesh,
 			modelKeys = Object.keys( models ),
 			randomModelKey;
 
 		this.groupGrass = this.manageOccurences( this.groupGrass, range, () => {
 			randomModelKey = modelKeys[ Math.floor( Math.random() * modelKeys.length ) ];
-
-			return this.setupMesh(
+			mesh = this.setupMesh(
 				[ 0.05, 0.15 ],
 				models[ randomModelKey ],
 				{ color: 0x519423 },
@@ -125,6 +160,16 @@ export default class FloraAndFauna {
 				undefined,
 				this.getRandomGlobeVector()
 			);
+
+			mesh.traverse( ( child ) => {
+				if ( child.material ) {
+					child.material.color = new THREE.Color( 0x519423 );
+					child.material.needsUpdate = true;
+					child.needsUpdate = true;
+				}
+			} );
+
+			return mesh;
 		}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 			let itemsToRemove = this.groupGrass.splice( indexRemovedFrom, indexRemovedTo );
 
@@ -171,31 +216,10 @@ export default class FloraAndFauna {
 	}
 
 	changeSwimmingDucks () {
-		// let bee = this.models.getModelJson( this.models.models.insects.Bee ),
-		// 	material = new THREE.MeshPhongMaterial(),
-		// 	mesh = new THREE.Mesh( bee.geometry, material );
-		
-		//this.globeGroup.add( mesh );
-		//console.log( bee );
-
-		// let model = this.globe.models.loadObjMtlModel( this.globe.models.models.test, ( mesh ) => {
+		// let model = this.globe.models.loadObjMtlModel( this.globe.models.models.vegetation.trees.deadTrees.DeadTree2, ( mesh ) => {
 		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
 		// 	mesh.position.y = 55;
-			
-		// 	this.globeGroup.add( mesh );
-		// } );
 
-		// let fen = this.globe.models.loadObjMtlModel( this.globe.models.models.Fen, ( mesh ) => {
-		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
-		// 	mesh.position.y = 55;
-			
-		// 	this.globeGroup.add( mesh );
-		// } );
-
-		// let wood = this.globe.models.loadObjMtlModel( this.globe.models.models.Wood, ( mesh ) => {
-		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
-		// 	mesh.position.y = 55;
-			
 		// 	this.globeGroup.add( mesh );
 		// } );
 	}
@@ -278,19 +302,34 @@ export default class FloraAndFauna {
 	}
 
 	setupMesh ( scaleRange = [ 0.1, 1 ], modelObject, materialOptions, yGlobeOffset = -0.07, isAnimation, customScaleMultiplier, customPosition ) {
-		let model = isAnimation ? this.models.getModelJson( modelObject ) : undefined,
-			mesh = isAnimation ? model : this.models.getModelObject( modelObject ),
+		let model,
+			mesh,
 			originGroup,
 			material,
 			scale = Utils.randomRange( scaleRange[ 0 ], scaleRange[ 1 ] ),
 			children,
+			meshToReturn;
+
+		if ( modelObject.uuid ) {
+			mesh = modelObject.clone();
+			model = modelObject.clone();
+		} else {
+			model = isAnimation ? this.models.getModelJson( modelObject ) : undefined;
+			mesh = isAnimation ? model : this.models.getModelObject( modelObject );
 			meshToReturn = mesh;
+		}
+
+		meshToReturn = mesh;
+
+		if ( mesh && mesh.scale ) {
+			scale = ( mesh.scale.x || 1 ) * scale;
+		}
 
 		// extend default material
-		materialOptions = CwUtils.extend( true, {
+		let defaultMaterial = Utils.getChildren( mesh )[ 0 ].material;
+
+		materialOptions = CwUtils.extend( true, defaultMaterial, {
 			color: 0xFFFFFF,
-			shininess: 0,
-			metalness: 0,
 			opacity: 0,
 			transparent: true,
 			shading: THREE.FlatShading

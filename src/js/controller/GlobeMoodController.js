@@ -35,7 +35,7 @@ const MoodStates = [
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
 			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassDryMud, false );
-			controller.floraAndFauna.changeGrassVegetation( [ 500, 1000 ], "deadGrass" );
+			controller.floraAndFauna.changeGrassVegetation( [ 50, 500 ], "deadGrass" );
 		},
 		leave: function ( controller ) {
 
@@ -44,7 +44,7 @@ const MoodStates = [
 		name: "Its-Growing",
 		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
+			// controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
 			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassFertile, false );
 			// controller.floraAndFauna.changeGrassVegetation( [ 200, 400 ], "deadGrass" );
 		},
