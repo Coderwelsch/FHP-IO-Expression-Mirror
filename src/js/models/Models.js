@@ -1,4 +1,5 @@
 import Textures from "../textures/Textures.js";
+import Utils from "../utils/Utils.js";
 import "../loader/DDSLoader.js";
 import "../loader/OBJLoader.js";
 import "../loader/MTLLoader.js";
@@ -28,7 +29,7 @@ let objectLoader = new THREE.ObjectLoader(),
 						dir: "files/models/vegetation/trees/dead/",
 						objSrc: "dead-tree-2.obj",
 						mtlSrc: "dead-tree-2.mtl",
-						scale: 1
+						scale: 1,
 					}
 				}
 			},
@@ -49,6 +50,52 @@ let objectLoader = new THREE.ObjectLoader(),
 						data: require( "../../json/models/vegetation/grass/grass-plant-2.json" )
 					}
 				}
+			},
+			mushrooms: {
+				Mushroom1: {
+					type: "obj",
+					dir: "files/models/vegetation/mushrooms/boletus/",
+					objSrc: "boletus.obj",
+					mtlSrc: "boletus.mtl",
+					scale: 1
+				}
+			}
+		},
+		stones: {
+			Stone1: {
+				type: "obj",
+				dir: "files/models/stones/",
+				objSrc: "stone_1.obj",
+				texSrc: "files/textures/stones/Craggy_Rock_With_Moss_UV_CM_1.jpg",
+				scale: 1
+			},
+			Stone2: {
+				type: "obj",
+				dir: "files/models/stones/",
+				objSrc: "stone_2.obj",
+				texSrc: "files/textures/stones/Craggy_Stone_With_Green_Moss_Litchen_UV_CM_1.jpg",
+				scale: 1
+			},
+			Stone3: {
+				type: "obj",
+				dir: "files/models/stones/",
+				objSrc: "stone_3.obj",
+				texSrc: "files/textures/stones/Rock_02_UV_H_CM_1.jpg",
+				scale: 1
+			},
+			Stone4: {
+				type: "obj",
+				dir: "files/models/stones/",
+				objSrc: "stone_4.obj",
+				texSrc: "files/textures/stones/Stone_06_UV_H_CM_1.jpg",
+				scale: 1
+			},
+			Stone5: {
+				type: "obj",
+				dir: "files/models/stones/",
+				objSrc: "stone_5.obj",
+				texSrc: "files/textures/stones/Very_Craggy_Grey_Rock_Moss_UV_CM_1.jpg",
+				scale: 1
 			}
 		},
 		birds: {
@@ -65,6 +112,10 @@ export default class Models {
 	}
 
 	getModelJson ( model ) {
+		if ( model.type === "json" ) {
+			return jsonLoader.parse( model.data );
+		}
+
 		return jsonLoader.parse( model );
 	}
 
@@ -92,22 +143,40 @@ export default class Models {
 		let mtlLoader = new THREE.MTLLoader(),
 			objLoader = new THREE.OBJLoader();
 
-		// load material (.mtl) file at first
-		mtlLoader.setBaseUrl( model.dir );
-		mtlLoader.setPath( model.dir );
-		mtlLoader.load( model.mtlSrc, ( material ) => {
-			material.preload();
+		if ( model.mtlSrc && model.mtlSrc ) {
+			// load material (.mtl) file at first
+			mtlLoader.setBaseUrl( model.dir );
+			mtlLoader.setPath( model.dir );
 
-			// obj preparation
-			objLoader.setMaterials( material );
+			mtlLoader.load( model.mtlSrc, ( material ) => {
+				material.preload();
+				// obj preparation
+				objLoader.setMaterials( material );
+				objLoader.setPath( model.dir );
+				objLoader.load( model.objSrc, ( mesh ) => {
+					if ( model.scale ) {
+						mesh.scale.set( model.scale, model.scale, model.scale );
+					}
+
+					callback( mesh );
+				} );
+			} );
+		} else {
 			objLoader.setPath( model.dir );
 			objLoader.load( model.objSrc, ( mesh ) => {
 				if ( model.scale ) {
 					mesh.scale.set( model.scale, model.scale, model.scale );
 				}
 
+				if ( model.texSrc ) {
+					for ( let child of Utils.getChildren( mesh ) ) {
+						child.material.map = new THREE.TextureLoader().load( model.texSrc );
+						child.material.needsUpdate = true;
+					}
+				}
+
 				callback( mesh );
 			} );
-		} );
+		}
 	}
 }

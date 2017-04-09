@@ -9,11 +9,12 @@ const MoodStates = [
 		test: ( moodValue ) => { return ( moodValue >= 0 && moodValue <= 0.1 ); },
 		enter: function ( controller ) {
 			controller.floraAndFauna.changeGlobeMaterial( Textures.globe.desert, false );
-			controller.floraAndFauna.changeSwimmingDucks();
+			controller.floraAndFauna.changeStones( [ 10, 20 ] );
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
 			controller.floraAndFauna.changeGrassVegetation();
 			controller.floraAndFauna.changeFlamingoFauna();
 			controller.floraAndFauna.changeTreeVegetation( [ 5, 10 ], "deadTrees" );
+			controller.floraAndFauna.changeMushroomsVegetation();
 		},
 		leave: function ( controller ) {
 
@@ -26,6 +27,7 @@ const MoodStates = [
 			controller.floraAndFauna.changeWaterLevel( 1 );
 			controller.floraAndFauna.changeTreeVegetation();
 			controller.floraAndFauna.changeGrassVegetation( [ 10, 20 ] );
+			controller.floraAndFauna.changeMushroomsVegetation( [ 1, 10 ] );
 		},
 		leave: function ( controller ) {
 
@@ -34,8 +36,10 @@ const MoodStates = [
 		name: "First-Seed",
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
+			// controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
 			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassDryMud, false );
 			controller.floraAndFauna.changeGrassVegetation( [ 50, 500 ], "deadGrass" );
+			controller.floraAndFauna.changeMushroomsVegetation( [ 10, 50 ] );
 		},
 		leave: function ( controller ) {
 
@@ -44,6 +48,7 @@ const MoodStates = [
 		name: "Its-Growing",
 		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
 		enter: function ( controller ) {
+			controller.floraAndFauna.changeGrassVegetation();
 			// controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
 			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassFertile, false );
 			// controller.floraAndFauna.changeGrassVegetation( [ 200, 400 ], "deadGrass" );
