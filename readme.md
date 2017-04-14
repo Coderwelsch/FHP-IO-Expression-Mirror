@@ -15,3 +15,7 @@ State 2:
 
 State 3:
 ![State 3](doc/assets/state-3.jpg)
+
+## Latest Changes
+### 2017-04-17: Added skeletons in state 1 and progress circle:
+![Skeleton and Progress](doc/assets/state-3-with-progress.jpg)
