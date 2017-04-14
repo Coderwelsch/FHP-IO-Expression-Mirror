@@ -1,0 +1,4 @@
+newmtl Skeleton_Body
+Kd 1 1 1
+map_Kd ../../textures/skeletons/Skeleton_Body_BaseColor.png
+illum 10

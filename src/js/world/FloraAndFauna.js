@@ -20,6 +20,8 @@ export default class FloraAndFauna {
 		this.groupStones = null;
 		this.groupMushrooms = null;
 		this.groupGrass = null;
+		this.groupFlowers = null;
+		this.groupSkeletons = null;
 	}
 
 	loadModels ( models = [], callback ) {
@@ -150,6 +152,72 @@ export default class FloraAndFauna {
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+
+				for ( let elem of itemsToRemove ) {
+					this.globeGroup.remove( elem );
+				}
+			} );
+		} );
+	}
+
+	changeSkeletons (  range = [ 0, 0 ] ) {
+		let skeletons = this.models.models.skeletons,
+			i = 0,
+			models = new Array( Object.keys( skeletons ).length );
+
+		for ( let key in skeletons ) {
+			models[ i ] = skeletons[ key ];
+			i++;
+		}
+
+		this.loadModels( models, ( loadedModels ) => {
+			this.groupSkeletons = this.manageOccurences( this.groupSkeletons, range, () => {
+				let index = Math.floor( Math.random() * loadedModels.length );
+
+				return this.setupMesh( {
+					scale: [ 2, 3 ],
+					model: loadedModels[ index ],
+					material: {
+						metalness: 100,
+						shininess: 0x000000
+					},
+					customPosition: this.getRandomGlobeVector()
+				} );
+			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
+				let itemsToRemove = this.groupSkeletons.splice( indexRemovedFrom, indexRemovedTo );
+
+				for ( let elem of itemsToRemove ) {
+					this.globeGroup.remove( elem );
+				}
+			} );
+		} );
+	}
+
+	changeFlowers ( range = [ 0, 0 ] ) {
+		let flowers = this.models.models.vegetation.flowers.sepal,
+			i = 0,
+			models = new Array( Object.keys( flowers ).length );
+
+		for ( let key in flowers ) {
+			models[ i ]= flowers[ key ];
+			i++;
+		}
+
+		this.loadModels( models, ( loadedModels ) => {
+			this.groupFlowers = this.manageOccurences( this.groupFlowers, range, () => {
+				let index = Math.floor( Math.random() * loadedModels.length );
+
+				return this.setupMesh( {
+					scale: [ 2, 3 ],
+					model: loadedModels[ index ],
+					material: {
+						metalness: 100,
+						shininess: 0x000000
+					},
+					customPosition: this.getRandomGlobeVector()
+				} );
+			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
+				let itemsToRemove = this.groupFlowers.splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );

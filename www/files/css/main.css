@@ -10,3 +10,62 @@ html, body {
 	width: 100%;
 	height: 100%;
 }
+
+#panel {
+	position: absolute;
+	top: 50%;
+	left: 20px;
+
+	min-width: 200px;
+
+	padding: 10px;
+
+	border: 1px solid white;
+	border-radius: 5px;
+
+	transform: translateY(-50%);
+}
+
+#panel * {
+	color: #FFFFFF;
+
+	padding: 0;
+	margin: 0;
+
+	font-family: "Helvetica Neue", sans-serif;
+}
+
+#panel h1 {
+	font-weight: 300;
+
+	text-align: center;
+	text-transform: uppercase;
+}
+
+#panel h1:after {
+	content: "";
+
+	height: 1px;
+	width: 100%;
+
+	margin-top: 7px;
+	margin-bottom: 7px;
+
+	display: block;
+
+	background-color: #FFFFFF;
+}
+
+#panel .progress {
+	position: relative;
+
+	width: 75%;
+
+	margin: 10px auto;
+	margin-top: 15px;
+}
+
+#panel .progress > svg {
+	width: 100%;
+	display: block;
+}

@@ -59,6 +59,31 @@ let objectLoader = new THREE.ObjectLoader(),
 					mtlSrc: "boletus.mtl",
 					scale: 1
 				}
+			},
+			flowers: {
+				sepal: {
+					Sepal1: {
+						type: "obj",
+						dir: "files/models/vegetation/flowers/sepal/sepal-1/",
+						objSrc: "sepal-1.obj",
+						mtlSrc: "sepal-1.mtl",
+						scale: 0.6
+					},
+					Sepal2: {
+						type: "obj",
+						dir: "files/models/vegetation/flowers/sepal/sepal-2/",
+						objSrc: "sepal-2.obj",
+						mtlSrc: "sepal-2.mtl",
+						scale: 0.06
+					},
+					Sepal3: {
+						type: "obj",
+						dir: "files/models/vegetation/flowers/sepal/sepal-3/",
+						objSrc: "sepal-3.obj",
+						mtlSrc: "sepal-3.mtl",
+						scale: 0.06
+					}
+				}
 			}
 		},
 		stones: {
@@ -102,6 +127,15 @@ let objectLoader = new THREE.ObjectLoader(),
 			Flamingo: {
 				type: "json",
 				data: require( "../../json/models/birds/flamingo.json" ) 
+			}
+		},
+		skeletons: {
+			SkeletonHuman: {
+				type: "obj",
+				dir: "files/models/skeletons/",
+				objSrc: "skeleton-1.obj",
+				mtlSrc: "skeleton-1.mtl",
+				scale: 0.2
 			}
 		}
 	};
