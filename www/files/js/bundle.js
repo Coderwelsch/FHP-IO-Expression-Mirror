@@ -76918,6 +76918,7 @@ const MoodStates = [
 			controller.floraAndFauna.changeWaterLevel( 0.975 );
 			controller.floraAndFauna.changeGrassVegetation();
 			controller.floraAndFauna.changeFlamingoFauna();
+			controller.floraAndFauna.changeTreeVegetation( undefined, "fertileTrees" );
 			controller.floraAndFauna.changeTreeVegetation( [ 5, 10 ], "deadTrees" );
 			controller.floraAndFauna.changeMushroomsVegetation();
 		},
@@ -76931,35 +76932,37 @@ const MoodStates = [
 			controller.floraAndFauna.changeGlobeMaterial( __WEBPACK_IMPORTED_MODULE_1__textures_Textures_js__["a" /* default */].globe.fertile, false );
 			controller.floraAndFauna.changeWaterLevel( 1 );
 			controller.floraAndFauna.changeSkeletons();
-			controller.floraAndFauna.changeTreeVegetation();
 			controller.floraAndFauna.changeFlowers();
 			controller.floraAndFauna.changeGrassVegetation( [ 10, 20 ] );
+			controller.floraAndFauna.changeTreeVegetation( [ 0, 0 ], "deadTrees" );
+			controller.floraAndFauna.changeTreeVegetation( [ 1, 5 ], "fertileTrees" );
 			controller.floraAndFauna.changeMushroomsVegetation( [ 1, 10 ] );
 		},
 		leave: function ( controller, doneCallback ) {
 
 		}
 	}, {
-		name: "First-Seed",
+		name: "Growing",
 		test: ( moodValue ) => { return ( moodValue > 0.2 && moodValue <= 0.3 ); },
 		enter: function ( controller ) {
 			// controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
 			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassDryMud, false );
 			controller.floraAndFauna.changeFlamingoFauna();
 			controller.floraAndFauna.changeGrassVegetation( [ 50, 500 ], "deadGrass" );
+			controller.floraAndFauna.changeTreeVegetation( [ 6, 10 ], "fertileTrees" );
 			controller.floraAndFauna.changeMushroomsVegetation( [ 10, 50 ] );
 			controller.floraAndFauna.changeFlowers( [ 5, 20 ] );
+			controller.floraAndFauna.changeTeepees();
 		},
 		leave: function ( controller, doneCallback ) {
 
 		}
 	}, {
-		name: "Its-Growing",
+		name: "Settlers",
 		test: ( moodValue ) => { return ( moodValue > 0.3 && moodValue <= 0.4 ); },
 		enter: function ( controller ) {
-			controller.floraAndFauna.changeFlamingoFauna( [ 10, 15 ] );
-			// controller.floraAndFauna.changeGlobeMaterial( Textures.globe.grassFertile, false );
-			controller.floraAndFauna.changeGrassVegetation( [ 200, 400 ], "deadGrass" );
+			controller.floraAndFauna.changeFlamingoFauna( [ 3, 6 ] );
+			controller.floraAndFauna.changeTeepees( [ 1, 3 ] );
 			controller.floraAndFauna.changeFlowers( [ 20, 30 ] );
 		},
 		leave: function ( controller, doneCallback ) {
@@ -78641,14 +78644,20 @@ let objectLoader = new THREE.ObjectLoader(),
 						type: "json",
 						data: __webpack_require__( 8 ),
 						texSrc: __WEBPACK_IMPORTED_MODULE_0__textures_Textures_js__["a" /* default */].tree.bark.texture,
-						bumpSrc: __WEBPACK_IMPORTED_MODULE_0__textures_Textures_js__["a" /* default */].tree.bark.bump
+						bumpSrc: __WEBPACK_IMPORTED_MODULE_0__textures_Textures_js__["a" /* default */].tree.bark.bump,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
 					},
 					DeadTree2: {
 						type: "obj",
 						dir: "files/models/vegetation/trees/dead/",
 						objSrc: "dead-tree-1.obj",
 						mtlSrc: "dead-tree-1.mtl",
-						scale: 0.035
+						scale: 0.035,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
 					},
 					DeadTree3: {
 						type: "obj",
@@ -78656,6 +78665,18 @@ let objectLoader = new THREE.ObjectLoader(),
 						objSrc: "dead-tree-2.obj",
 						mtlSrc: "dead-tree-2.mtl",
 						scale: 1,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
+					}
+				},
+				fertileTrees: {
+					FertileTree1: {
+						type: "obj",
+						dir: "files/models/vegetation/trees/fertile/",
+						objSrc: "fertile-tree-1.obj",
+						mtlSrc: "fertile-tree-1.mtl",
+						scale: 0.1
 					}
 				}
 			},
@@ -78761,7 +78782,20 @@ let objectLoader = new THREE.ObjectLoader(),
 				dir: "files/models/skeletons/",
 				objSrc: "skeleton-1.obj",
 				mtlSrc: "skeleton-1.mtl",
-				scale: 0.2
+				scale: 0.15
+			}
+		},
+		buildings: {
+			tents: {
+				teepees: {
+					Teepee1: {
+						type: "obj",
+						dir: "files/models/buildings/tents/teepees/",
+						objSrc: "tent-1.obj",
+						mtlSrc: "tent-1.mtl",
+						scale: 0.12
+					}
+				}
 			}
 		}
 	};
@@ -79201,7 +79235,8 @@ class FloraAndFauna {
 		this.textures = __WEBPACK_IMPORTED_MODULE_2__textures_Textures_js__["a" /* default */];
 
 		this.groupFlamingos = null;
-		this.groupTrees = null;
+		this.groupTrees = {};
+		this.groupTeepees = null;
 		this.groupStones = null;
 		this.groupMushrooms = null;
 		this.groupGrass = null;
@@ -79295,7 +79330,7 @@ class FloraAndFauna {
 		} } );
 	}
 
-	changeTreeVegetation ( range = [ 0, 0 ], treeModelsType = "deadTrees" ) {
+	changeTreeVegetation ( range = [ 0, 0 ], treeModelsType ) {
 		let modelsType = this.models.models.vegetation.trees[ treeModelsType ],
 			models = [];
 
@@ -79304,19 +79339,17 @@ class FloraAndFauna {
 		}
 
 		this.loadModels( models, ( loadedModels ) => {
-			this.groupTrees = this.manageOccurences( this.groupTrees, range, () => {
+			this.groupTrees[ treeModelsType ] = this.manageOccurences( this.groupTrees[ treeModelsType ], range, () => {
 				let index = Math.floor( Math.random() * loadedModels.length );
 
 				return this.setupMesh( {
 					scale: [ 0.5, 1 ],
 					model: loadedModels[ index ],
-					material: {
-						color: 0xFFFFFF
-					},
+					material: models[ index ].mtlOptions,
 					customPosition: this.getRandomGlobeVector()
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
-				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+				let itemsToRemove = this.groupTrees[ treeModelsType ].splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -79336,7 +79369,7 @@ class FloraAndFauna {
 					customPosition: this.getRandomGlobeVector()
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
-				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+				let itemsToRemove = this.groupMushrooms.splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -79403,6 +79436,36 @@ class FloraAndFauna {
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 				let itemsToRemove = this.groupFlowers.splice( indexRemovedFrom, indexRemovedTo );
+
+				for ( let elem of itemsToRemove ) {
+					this.globeGroup.remove( elem );
+				}
+			} );
+		} );
+	}
+
+	changeTeepees ( range = [ 0, 0 ] ) {
+		let teepees = this.models.models.buildings.tents.teepees,
+			i = 0,
+			models = new Array( Object.keys( teepees ).length );
+
+		for ( let key in teepees ) {
+			models[ i ]= teepees[ key ];
+			i++;
+		}
+
+		this.loadModels( models, ( loadedModels ) => {
+			this.groupTeepees = this.manageOccurences( this.groupTeepees, range, () => {
+				let index = Math.floor( Math.random() * loadedModels.length );
+
+				return this.setupMesh( {
+					scale: [ 2, 3 ],
+					model: loadedModels[ index ],
+					randomRotation: false,
+					customPosition: this.getRandomGlobeVector()
+				} );
+			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
+				let itemsToRemove = this.groupTeepees.splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -79505,15 +79568,6 @@ class FloraAndFauna {
 		} );
 	}
 
-	changeSwimmingDucks () {
-		// let model = this.globe.models.loadObjMtlModel( this.globe.models.models.vegetation.trees.deadTrees.DeadTree2, ( mesh ) => {
-		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
-		// 	mesh.position.y = 55;
-
-		// 	this.globeGroup.add( mesh );
-		// } );
-	}
-
 	getRandomGlobeVector () {
 		let vector,
 			vertices = this.globe.globeMesh.geometry.vertices,
@@ -79566,7 +79620,7 @@ class FloraAndFauna {
 	manageOccurences ( group, range, addFunction, rmFunction, rmDoneCallback ) {
 		let count = Math.round( __WEBPACK_IMPORTED_MODULE_0__utils_Utils_js__["a" /* default */].randomRange( range[ 0 ], range[ 1 ] ) );
 
-		if ( group === null ) {
+		if ( !group || group === null ) {
 			group = [];
 		}
 
@@ -79604,6 +79658,7 @@ class FloraAndFauna {
 		// merge settings
 		settings = __WEBPACK_IMPORTED_MODULE_1__vendor_com_coderwelsch_Utils_js__["a" /* default */].extend( true, {
 			scale: [ 0.1, 1 ],
+			randomRotation: true,
 			model: undefined,
 			mergeWithDefaultMaterial: true,
 			material: {
@@ -79686,9 +79741,11 @@ class FloraAndFauna {
 			mesh.rotateX( Math.PI / 2 );
 
 			// add some random rotation
-			mesh.rotateX( THREE.Math.degToRad( 15 ) * Math.random() );
-			mesh.rotateY( THREE.Math.degToRad( 90 ) * Math.random() );
-			mesh.rotateZ( THREE.Math.degToRad( 15 ) * Math.random() );
+			if ( settings.randomRotation ) {
+				mesh.rotateX( THREE.Math.degToRad( 15 ) * Math.random() );
+				mesh.rotateY( THREE.Math.degToRad( 90 ) * Math.random() );
+				mesh.rotateZ( THREE.Math.degToRad( 15 ) * Math.random() );
+			}
 		} else {
 			// set height position of mesh in origin group
 			mesh.position.y = this.globeRadius + settings.yOffset;

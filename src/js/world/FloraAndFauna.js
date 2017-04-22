@@ -16,7 +16,8 @@ export default class FloraAndFauna {
 		this.textures = Textures;
 
 		this.groupFlamingos = null;
-		this.groupTrees = null;
+		this.groupTrees = {};
+		this.groupTeepees = null;
 		this.groupStones = null;
 		this.groupMushrooms = null;
 		this.groupGrass = null;
@@ -110,7 +111,7 @@ export default class FloraAndFauna {
 		} } );
 	}
 
-	changeTreeVegetation ( range = [ 0, 0 ], treeModelsType = "deadTrees" ) {
+	changeTreeVegetation ( range = [ 0, 0 ], treeModelsType ) {
 		let modelsType = this.models.models.vegetation.trees[ treeModelsType ],
 			models = [];
 
@@ -119,19 +120,17 @@ export default class FloraAndFauna {
 		}
 
 		this.loadModels( models, ( loadedModels ) => {
-			this.groupTrees = this.manageOccurences( this.groupTrees, range, () => {
+			this.groupTrees[ treeModelsType ] = this.manageOccurences( this.groupTrees[ treeModelsType ], range, () => {
 				let index = Math.floor( Math.random() * loadedModels.length );
 
 				return this.setupMesh( {
 					scale: [ 0.5, 1 ],
 					model: loadedModels[ index ],
-					material: {
-						color: 0xFFFFFF
-					},
+					material: models[ index ].mtlOptions,
 					customPosition: this.getRandomGlobeVector()
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
-				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+				let itemsToRemove = this.groupTrees[ treeModelsType ].splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -151,7 +150,7 @@ export default class FloraAndFauna {
 					customPosition: this.getRandomGlobeVector()
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
-				let itemsToRemove = this.groupTrees.splice( indexRemovedFrom, indexRemovedTo );
+				let itemsToRemove = this.groupMushrooms.splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -218,6 +217,36 @@ export default class FloraAndFauna {
 				} );
 			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
 				let itemsToRemove = this.groupFlowers.splice( indexRemovedFrom, indexRemovedTo );
+
+				for ( let elem of itemsToRemove ) {
+					this.globeGroup.remove( elem );
+				}
+			} );
+		} );
+	}
+
+	changeTeepees ( range = [ 0, 0 ] ) {
+		let teepees = this.models.models.buildings.tents.teepees,
+			i = 0,
+			models = new Array( Object.keys( teepees ).length );
+
+		for ( let key in teepees ) {
+			models[ i ]= teepees[ key ];
+			i++;
+		}
+
+		this.loadModels( models, ( loadedModels ) => {
+			this.groupTeepees = this.manageOccurences( this.groupTeepees, range, () => {
+				let index = Math.floor( Math.random() * loadedModels.length );
+
+				return this.setupMesh( {
+					scale: [ 2, 3 ],
+					model: loadedModels[ index ],
+					randomRotation: false,
+					customPosition: this.getRandomGlobeVector()
+				} );
+			}, this.fadeOutObject, ( indexRemovedFrom, indexRemovedTo ) => {
+				let itemsToRemove = this.groupTeepees.splice( indexRemovedFrom, indexRemovedTo );
 
 				for ( let elem of itemsToRemove ) {
 					this.globeGroup.remove( elem );
@@ -320,15 +349,6 @@ export default class FloraAndFauna {
 		} );
 	}
 
-	changeSwimmingDucks () {
-		// let model = this.globe.models.loadObjMtlModel( this.globe.models.models.vegetation.trees.deadTrees.DeadTree2, ( mesh ) => {
-		// 	mesh.scale.set( 0.01, 0.01, 0.01 );
-		// 	mesh.position.y = 55;
-
-		// 	this.globeGroup.add( mesh );
-		// } );
-	}
-
 	getRandomGlobeVector () {
 		let vector,
 			vertices = this.globe.globeMesh.geometry.vertices,
@@ -381,7 +401,7 @@ export default class FloraAndFauna {
 	manageOccurences ( group, range, addFunction, rmFunction, rmDoneCallback ) {
 		let count = Math.round( Utils.randomRange( range[ 0 ], range[ 1 ] ) );
 
-		if ( group === null ) {
+		if ( !group || group === null ) {
 			group = [];
 		}
 
@@ -419,6 +439,7 @@ export default class FloraAndFauna {
 		// merge settings
 		settings = CwUtils.extend( true, {
 			scale: [ 0.1, 1 ],
+			randomRotation: true,
 			model: undefined,
 			mergeWithDefaultMaterial: true,
 			material: {
@@ -501,9 +522,11 @@ export default class FloraAndFauna {
 			mesh.rotateX( Math.PI / 2 );
 
 			// add some random rotation
-			mesh.rotateX( THREE.Math.degToRad( 15 ) * Math.random() );
-			mesh.rotateY( THREE.Math.degToRad( 90 ) * Math.random() );
-			mesh.rotateZ( THREE.Math.degToRad( 15 ) * Math.random() );
+			if ( settings.randomRotation ) {
+				mesh.rotateX( THREE.Math.degToRad( 15 ) * Math.random() );
+				mesh.rotateY( THREE.Math.degToRad( 90 ) * Math.random() );
+				mesh.rotateZ( THREE.Math.degToRad( 15 ) * Math.random() );
+			}
 		} else {
 			// set height position of mesh in origin group
 			mesh.position.y = this.globeRadius + settings.yOffset;

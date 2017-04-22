@@ -15,14 +15,20 @@ let objectLoader = new THREE.ObjectLoader(),
 						type: "json",
 						data: require( "../../json/models/vegetation/trees/tree-dead.json" ),
 						texSrc: Textures.tree.bark.texture,
-						bumpSrc: Textures.tree.bark.bump
+						bumpSrc: Textures.tree.bark.bump,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
 					},
 					DeadTree2: {
 						type: "obj",
 						dir: "files/models/vegetation/trees/dead/",
 						objSrc: "dead-tree-1.obj",
 						mtlSrc: "dead-tree-1.mtl",
-						scale: 0.035
+						scale: 0.035,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
 					},
 					DeadTree3: {
 						type: "obj",
@@ -30,6 +36,18 @@ let objectLoader = new THREE.ObjectLoader(),
 						objSrc: "dead-tree-2.obj",
 						mtlSrc: "dead-tree-2.mtl",
 						scale: 1,
+						mtlOptions: {
+							color: 0xFFFFFF
+						}
+					}
+				},
+				fertileTrees: {
+					FertileTree1: {
+						type: "obj",
+						dir: "files/models/vegetation/trees/fertile/",
+						objSrc: "fertile-tree-1.obj",
+						mtlSrc: "fertile-tree-1.mtl",
+						scale: 0.1
 					}
 				}
 			},
@@ -135,7 +153,20 @@ let objectLoader = new THREE.ObjectLoader(),
 				dir: "files/models/skeletons/",
 				objSrc: "skeleton-1.obj",
 				mtlSrc: "skeleton-1.mtl",
-				scale: 0.2
+				scale: 0.15
+			}
+		},
+		buildings: {
+			tents: {
+				teepees: {
+					Teepee1: {
+						type: "obj",
+						dir: "files/models/buildings/tents/teepees/",
+						objSrc: "tent-1.obj",
+						mtlSrc: "tent-1.mtl",
+						scale: 0.12
+					}
+				}
 			}
 		}
 	};
